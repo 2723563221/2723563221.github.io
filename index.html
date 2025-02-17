@@ -242,14 +242,7 @@
             document.body.style.opacity = 1;
             document.querySelector('.header').style.transform = 'translateY(0)';
             
-            // 用户交互后自动播放音乐
-            document.addEventListener('click', () => {
-                if (!isMusicPlaying) {
-                    bgMusic.play();
-                    musicBtn.textContent = '⏸';
-                    isMusicPlaying = true;
-                }
-            }, { once: true });
+            
         });
     </script>
 </body>
