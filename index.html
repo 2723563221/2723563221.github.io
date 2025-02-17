@@ -2,609 +2,255 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>小明同学</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出生帝国官方网站</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
         }
+
         body {
-            overflow-y: auto;
-            font-family: Arial, sans-serif;
-            background: #FFFFFF;
-            min-height: 100vh;
+            background: #1a1a1a;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
-        .profile {
-            position: relative;
-            color: black;
-            padding: 15px;
-            touch-action: pan-y;
+
+        .header {
+            background: linear-gradient(45deg, #8B0000, #4B0082);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 5px solid #gold;
+            transform: translateY(-20px);
+            transition: transform 0.5s;
         }
-        .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-        .stats {
-            font-size: 14px;
-            margin: 10px 0;
-        }
-        .music-control {
-            background: none;
-            border: none;
-            width: 90vw;
-            height: 50px;
-            cursor: pointer;
-            display: block;
+
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 2rem;
         }
-       
-        .music-control img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .grid {
+
+        .imperial-court {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
         }
-        .grid img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+
+        .emperor-card {
+            background: #2c2c2c;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
         }
-        .thumbnail {
-            aspect-ratio: 3/4;
-            background: #FFFFFF;
-            position: relative;
-        }
-        .folder-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: none;
-            background: #000;
-            z-index: 1000;
-        }
-        .folder {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-        .carousel {
-            display: flex;
+
+        .general-card {
+            background: #333;
+            padding: 1.5rem;
+            border-radius: 8px;
             transition: transform 0.3s;
+            cursor: pointer;
+            margin-bottom: 1rem;
         }
-        .media-item {
-            flex: 0 0 100%;
-            height: 100vh;
+
+        .general-card:hover {
+            transform: translateY(-5px);
+            background: #404040;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+
+        .position {
+            color: #9370DB;
+            font-weight: bold;
+        }
+
+        .name {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .general-link {
+            color: #FFD700;
+            text-decoration: none;
+            display: block;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            transition: opacity 0.3s;
+        }
+
+        .general-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #FFD700;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.3s, background 0.3s;
+            z-index: 999;
         }
-        video, img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+
+        .music-control:hover {
+            transform: scale(1.1);
+            background: #ffcc00;
         }
-        .close-btn {
-            position: absolute;
-            top: 30px;
-            right: 40px;
-            width: 60px;
-            height: 60px;
-            background-image: url('https://mx-1341045368.cos.ap-chengdu.myqcloud.com/241226-t.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            text-indent: -9999px;
-            border: none;
-            cursor: pointer;
-            z-index: 1001;
-            border-radius: 50%;
+
+        @media (max-width: 768px) {
+            .imperial-court {
+                grid-template-columns: 1fr;
+            }
         }
-        /* 添加加载动画 */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.loading {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 30px;
-  height: 30px;
-  border: 3px solid rgba(0,0,0,0.1);
-  border-top-color: #000;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-/* 添加滑动提示箭头 */
-.swipe-hint {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0.5;
-  animation: bounce 1s infinite;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-       /* 新增滑动提示样式 */
-.swipe-hint {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-  z-index: 2000;
-}
-
-.swipe-up-hint {
-  top: 20px;
-  background: url(https://example.com/arrow-up.svg) no-repeat center/contain;
-  width: 40px;
-  height: 40px;
-}
-
-.swipe-down-hint {
-  bottom: 20px;
-  background: url(https://example.com/arrow-down.svg) no-repeat center/contain;
-  width: 40px;
-  height: 40px;
-}
-
-/* 滑动时的动态反馈 */
-.folder-container::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255,255,255,0.1);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.swiping-up .folder-container::after {
-  opacity: 1;
-  background: linear-gradient(to top, transparent 50%, rgba(0,0,0,0.2) 100%);
-}
-
-.swiping-down .folder-container::after {
-  opacity: 1;
-  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.2) 100%);
-}
-
-/* 添加文件夹切换动画 */
-.folder-container {
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.swiping-up .folder-container {
-  transform: translateY(100vh);
-}
-
-.swiping-down .folder-container {
-  transform: translateY(-100vh);
-}
     </style>
 </head>
 <body>
-    <div class="profile">
-        <img src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/241226-t.jpg" class="avatar" alt="头像">
-        <h1>小明同学</h1>
-        <div class="stats">
-            <span>阳高县</span>
-            <span>第一安琪拉</span>
-            <br>
-            <button class="music-control" id="musicBtn">
-                <img src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/gz.png" alt="Play Music" id="playIcon">
-            </button>
-        </div>
-        <link rel="preload" href="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/xht.mp3" as="audio">
-        <audio id="bgMusic" loop>
-            <source src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/xht.mp3" type="audio/mpeg">
-            您的浏览器不支持音频播放。
-        </audio>
-       <div class="grid">
-            <div class="thumbnail" data-folder="1">
-                <img src="250217-0.webp" class="thumb" alt="缩略图">
+    <header class="header">
+        <h1>出生帝国</h1>
+        <p>千秋万代，一统江山</p>
+    </header>
+
+    <div class="emperor-card">
+    <h2>皇室成员</h2>
+    <div class="position">皇帝</div>
+    <div class="name">王明霞</div>
+    <a href="https://www.csyan.asia/ming" 
+       class="general-link" 
+       target="_blank">
+        查看详情 →
+    </a>
+</div>
+
+            <div>
+                <h2>军事统帅</h2>
+                <div class="generals-grid">
+                    <!-- 大将军（静态部分） -->
+                    <div class="general-card">
+                        <div class="position">大将军</div>
+                        <div class="name">王绣朝</div>
+                        <a href="https://v.douyin.com/ifG5dP1B/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title=" 
+                           class="general-link"
+                           target="_blank">
+                            查看详情 →
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="thumbnail" data-folder="2">
-                <img src="250115-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="3">
-                <img src="250101-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="4">
-                <img src="241215-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="5">
-                <img src="241128-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="6">
-                <img src="241123-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="7">
-                <img src="241116-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="8">
-                <img src="241102-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="9">
-                <img src="241010-1-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="10">
-                <img src="241005-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="11">
-                <img src="241001-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="12">
-                <img src="240930-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="13">
-                <img src="240923-1-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="14">
-                <img src="240915-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="15">
-                <img src="240910-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="16">
-                <img src="240904-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="17">
-                <img src="240826-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="18">
-                <img src="240624-0.webp" class="thumb" alt="缩略图">
-            </div>
-            <div class="thumbnail" data-folder="19">
-                <img src="240529-0.webp" class="thumb" alt="缩略图">
-            </div>
-            
-            
         </div>
     </div>
 
-    <template id="folderTemplate">
-        <div class="folder-container">
-            <div class="folder">
-                <div class="swipe-hint swipe-up-hint"></div>
-                <div class="swipe-hint swipe-down-hint"></div>
-                <div class="carousel"></div>
-                <div class="date"></div>
-                <audio class="bgm"></audio>
-                <div class="close-btn">close</div>
-                </div>
-        </div>
-    </template>
+    <!-- 音乐控制按钮 -->
+    <button class="music-control" id="musicBtn">🎵</button>
 
-   <script>  
-const BASE_URL = 'https://mx-1341045368.cos.ap-chengdu.myqcloud.com/';  
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop>
+        <source src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/xht.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放。
+    </audio>
 
-const foldersData = {  
-    1: { bgm: "250217.mp3", media: ["250217-1.mp4"] },  
-    2: { bgm: "250115.mp3", media: ["250115-1.mp4", "250115-2.mp4"] }, 
-    3: { bgm: "250101.mp3", media: ["250101-1.mp4", "250101-2.mp4", "250101-3.mp4", "250101-4.mp4"] },  
-    4: { bgm: "241215.mp3", media: ["241215-1.mp4", "241215-2.mp4", "241215-3.mp4", "241215-4.webp"] },  
-    5: { bgm: "241128.mp3", media: ["241128-1.png"] },  
-    6: { bgm: "241123.mp3", media: ["241123-1.mp4", "241123-2.mp4", "241123-3.png"] },  
-    7: { bgm: "241116.mp3", media: ["241116-1.mp4"] },  
-    8: { bgm: "241102.mp3", media: ["241102-1.jpeg", "241102-2.jpeg", "241102-3.jpeg"] },  
-    9: { bgm: "241010.mp3", media: ["241010-1-0.webp", "241010-2.webp"] },  
-    10: { bgm: "241005.mp3", media: ["241005-1.mp4"] },  
-    11: { bgm: "241001.mp3", media: ["241001-1.webp", "241001-2.webp", "241001-3.webp", "241001-4.webp", "241001-5.webp"] },  
-    12: { bgm: "240930.mp3", media: ["240930-1.mp4"] },  
-    13: { bgm: "240923.mp3", media: ["240923-1-0.webp"] },  
-    14: { bgm: "240915.mp3", media: ["240915-1.webp", "240915-2.webp"] },  
-    15: { bgm: "240910.mp3", media: ["240910-1.jpg", "240910-2.jpg"] },  
-    16: { bgm: "240904.mp3", media: ["240904-1.mp4"] },  
-    17: { bgm: "240826.mp3", media: ["240826-1.jpg"] },  
-    18: { bgm: "240624.mp3", media: ["240624-1.mp4"] },  
-    19: { media: ["240529-1.mp4"] }  
-};  
+    <script>
+        // 将军数据
+        const generals = [
+            { 
+                position: "前将军",
+                name: "雷东燕",
+                link: "https://www.csyan.asia/yan"
+            },
+            { 
+                position: "左将军",
+                name: "雷东莺",
+                link: "https://v.douyin.com/ifGPnoXR/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
+            },
+            { 
+                position: "右将军",
+                name: "樊亚春",
+                link: "https://v.douyin.com/ifGPKVJ7/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
+            },
+            { 
+                position: "后将军",
+                name: "侯大宇",
+                link: "https://v.douyin.com/ifG5RYua/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
+            }
+        ];
 
-let currentFolder = null;  
-let currentIndex = 0;  
-let currentFolderId = null; // 记录当前文件夹ID
-let isHomeScrollEnabled = true; // 控制首页滑动是否启用
+        // 动态生成将军卡片
+        const generalsGrid = document.querySelector('.generals-grid');
+        generals.forEach(general => {
+            const card = document.createElement('div');
+            card.className = 'general-card';
+            card.innerHTML = `
+                <div class="position">${general.position}</div>
+                <div class="name">${general.name}</div>
+                <a href="${general.link}" 
+                   class="general-link"
+                   target="_blank">
+                    查看详情 →
+                </a>
+            `;
+            generalsGrid.appendChild(card);
+        });
 
-document.addEventListener('DOMContentLoaded', function() {
-  // 获取所有缩略图元素
-  const thumbs = document.querySelectorAll('.grid .thumb');
-  
-  // 定义基础路径
-  const basePath = 'https://mx-1341045368.cos.ap-chengdu.myqcloud.com/';
-  
-  // 遍历所有图片并更新路径
-  thumbs.forEach(img => {
-    const originalSrc = img.getAttribute('src');
-    img.src = basePath + originalSrc;
-  });
-});
+        // 卡片交互效果
+        document.querySelectorAll('.general-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
 
-// 绑定缩略图点击事件  
-document.querySelectorAll('.thumbnail').forEach(thumb => {  
-    thumb.addEventListener('click', () => {  
-        const folderId = thumb.dataset.folder;  
-        openFolder(folderId);  
-    });  
-});  
+        // 音乐控制
+        const musicBtn = document.getElementById('musicBtn');
+        const bgMusic = document.getElementById('bgMusic');
+        let isMusicPlaying = false;
 
-// 音乐控制逻辑  
-const musicBtn = document.getElementById('musicBtn');  
-const bgMusic = document.getElementById('bgMusic');  
-const playIcon = document.getElementById('playIcon');  
-let isMusicPlaying = false;  
+        musicBtn.addEventListener('click', () => {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicBtn.textContent = '🎵';
+            } else {
+                bgMusic.play();
+                musicBtn.textContent = '⏸';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
 
-musicBtn.addEventListener('click', () => {  
-    if (isMusicPlaying) {  
-        bgMusic.pause();  
-        playIcon.src = BASE_URL + 'gz.png';  
-    } else {  
-        bgMusic.play();  
-        playIcon.src = BASE_URL + 'ygz.png';  
-    }  
-    isMusicPlaying = !isMusicPlaying;  
-});  
-
-// 打开文件夹  
-function openFolder(folderId) {  
-    currentFolderId = parseInt(folderId); // 记录当前文件夹ID
-    const data = foldersData[folderId];  
-    const template = document.getElementById('folderTemplate');  
-    const clone = template.content.cloneNode(true);  
-    const container = clone.querySelector('.folder-container');  
-
-    // 设置背景音乐  
-    const bgm = container.querySelector('.bgm');  
-    bgm.src = BASE_URL + data.bgm;  
-    bgm.loop = true;  
-
-    // 初始化轮播内容  
-    const carousel = container.querySelector('.carousel');  
-    data.media.forEach(file => {  
-        const item = document.createElement('div');  
-        item.className = 'media-item';  
-        if (file.endsWith('.mp4')) {  
-            const video = document.createElement('video');  
-            video.loop = true;  
-            video.innerHTML = `<source src="${BASE_URL}${file}" type="video/mp4">`;  
-            video.addEventListener('loadeddata', () => {  
-                video.volume = 1;  
-                if (currentIndex === 0) video.play();  
-            });  
-            item.appendChild(video);  
-        } else {  
-            const img = document.createElement('img');  
-            img.src = BASE_URL + file;  
-            item.appendChild(img);  
-        }  
-        carousel.appendChild(item);  
-    });  
-
-    // 添加到页面并显示  
-    document.body.appendChild(clone);  
-    container.style.display = 'block';  
-    currentFolder = container;  
-    bgm.play();  
-
-    // 禁用首页滑动  
-    disableHomeScroll();  
-
-    // 初始化滑动逻辑  
-    initSwipe(container);  
-}  
-
-// 初始化滑动逻辑  
-function initSwipe(container) {  
-    let startX = 0;  
-    let startY = 0;  
-    let isSwiping = false;  
-    let verticalHintTimeout;
-    let isFirstInteraction = true;
-
-    container.addEventListener('touchstart', e => {  
-        startX = e.touches[0].clientX;  
-        startY = e.touches[0].clientY;  
-        isSwiping = true;  
-        // 新增：清除首次提示
-        if(isFirstInteraction) {
-            clearTimeout(verticalHintTimeout);
-            isFirstInteraction = false;
-        }
-    });  
-
-    container.addEventListener('touchmove', e => {  
-        if (!isSwiping) return;  
-        const deltaX = e.touches[0].clientX - startX;  
-        const deltaY = e.touches[0].clientY - startY;
-        container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100 + deltaX / window.innerWidth * 100}%)`;  
-   // 新增：实时垂直滑动反馈
-        if(Math.abs(deltaY) > 50) {
-            container.classList.add(deltaY > 0 ? 'swiping-down' : 'swiping-up');
-        } else {
-            container.classList.remove('swiping-up', 'swiping-down');
-        }
-        
-        container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100 + deltaX / window.innerWidth * 100}%)`;  
-    });  
-
-    container.addEventListener('touchend', e => { 
-        if (!isSwiping) return;  
-        isSwiping = false;  
-
-        const deltaX = e.changedTouches[0].clientX - startX;  
-        const deltaY = e.changedTouches[0].clientY - startY;  
-
-        // 新增：移除滑动状态类
-        container.classList.remove('swiping-up', 'swiping-down');
-
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {  
-            // 水平滑动处理  
-            if (Math.abs(deltaX) > 50) {  
-                if (deltaX > 0 && currentIndex > 0) {  
-                    currentIndex--;  
-                } else if (deltaX < 0 && currentIndex < container.querySelectorAll('.media-item').length - 1) {  
-                    currentIndex++;  
-                }  
-            }  
-            container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100}%)`;  
-            playCurrentMedia();  
-        } else {  
-            // 垂直滑动处理  
-            if (Math.abs(deltaY) > 100) {  
+        // 页面加载动画和音乐自动播放
+        window.addEventListener('load', () => {
+            document.body.style.opacity = 1;
+            document.querySelector('.header').style.transform = 'translateY(0)';
             
-            // 添加切换动画类
-    container.classList.add(deltaY > 0 ? 'swiping-up' : 'swiping-down');
-    
-                closeFolder();  
-                let newFolderId = currentFolderId;  
-                if (deltaY > 0) {  
-                    newFolderId--;  
-                    if (newFolderId < 1) newFolderId = 18;  
-                } else {  
-                    newFolderId++;  
-                    if (newFolderId > 18) newFolderId = 1;  
-                }  
-                setTimeout(() => openFolder(newFolderId.toString()), 10);  
-            } else {  
-                container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100}%)`;  
-            }  
-        }  
-    });  
-
-    // 关闭按钮逻辑  
-    container.querySelector('.close-btn').addEventListener('click', () => {  
-        closeFolder();  
-    });  
-    
-    function showVerticalHint(direction) {
-  const container = currentFolder.querySelector('.folder-container');
-  container.classList.add(`show-${direction}-hint`);
-  
-  clearTimeout(verticalHintTimeout);
-  verticalHintTimeout = setTimeout(() => {
-    container.classList.remove(`show-${direction}-hint`);
-  }, 1000);
-}
-}  
-
-// 播放当前媒体  
-function playCurrentMedia() {  
-    const currentItem = currentFolder.querySelectorAll('.media-item')[currentIndex];  
-    const video = currentItem.querySelector('video');  
-    if (video) {  
-        video.currentTime = 0;  
-        video.play();  
-    }  
-}  
-
-// 关闭文件夹  
-function closeFolder() {  
-    currentFolder.remove();  
-    currentFolder = null;  
-    currentIndex = 0;  
-
-    // 重新启用首页滑动  
-    enableHomeScroll();  
-}  
-
-// 获取缩略图路径  
-function getThumbnail(file) {  
-    if (file.endsWith('.mp4')) {  
-        return file.replace('.mp4', '-0.webp');  
-    }  
-    return file;  
-}  
-
-// 禁用首页滑动  
-function disableHomeScroll() {  
-    isHomeScrollEnabled = false;  
-    document.body.style.overflow = 'hidden'; // 禁用页面滚动  
-}  
-
-// 启用首页滑动  
-function enableHomeScroll() {  
-    isHomeScrollEnabled = true;  
-    document.body.style.overflow = 'auto'; // 恢复页面滚动  
-}  
-
-// 监听首页滑动事件  
-document.addEventListener('touchmove', (e) => {  
-    if (!isHomeScrollEnabled) {  
-        e.preventDefault(); // 如果首页滑动被禁用，阻止默认行为  
-    }  
-}, { passive: false });  
-
-// 将功能拆分为模块
-const MediaPlayer = {
-  init() {
-    this.bindEvents();
-  },
-  
-  bindEvents() {
-    // 事件绑定逻辑
-  }
-};
-
-const FolderViewer = {
-  // 文件夹相关逻辑
-};
-
-// 将配置数据独立
-const CONFIG = {
-  baseUrl: 'https://mx-1341045368.cos.ap-chengdu.myqcloud.com/',
-  folders: { /* ... */ },
-  defaultAvatar: '241226-t.jpg'
-};
-
-// 改进关闭逻辑
-function closeFolder() {
-  if (currentFolder) {
-    // 停止所有媒体播放
-    currentFolder.querySelectorAll('video, audio').forEach(media => {
-      media.pause();
-      media.src = '';
-      media.load();
-    });
-    
-    currentFolder.remove();
-    currentFolder = null;
-    currentIndex = 0;
-  }
-  enableHomeScroll();
-}
-
-// 添加媒体错误处理
-function createMediaElement(file) {
-  const media = file.endsWith('.mp4') ? 
-    document.createElement('video') : 
-    document.createElement('img');
-
-  media.onerror = () => {
-    console.error('Failed to load:', file);
-    media.parentElement?.remove();
-  };
-  
-  return media;
-}
-</script>  
+            // 用户交互后自动播放音乐
+            document.addEventListener('click', () => {
+                if (!isMusicPlaying) {
+                    bgMusic.play();
+                    musicBtn.textContent = '⏸';
+                    isMusicPlaying = true;
+                }
+            }, { once: true });
+        });
+    </script>
 </body>
 </html>
