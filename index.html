@@ -2,712 +2,255 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>小明同学</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出生帝国官方网站</title>
     <style>
-                                * {
-            	margin:0;
-            	padding:0;
-            	box-sizing:border-box;
-            }
-            body {
-            	overflow-y:auto;
-            	font-family:Arial,sans-serif;
-            	background:#FFFFFF;
-            	min-height:100vh;
-            }
-            .profile {
-            	position:relative;
-            	color:white;
-            	padding:15px;
-            	touch-action:pan-y;
-            	z-index:1;
-            	top:0px;
-            	
-            }
-            .avatar {
-            	width:100px;
-            	height:100px;
-            	border-radius:50%;
-            	margin-bottom:50px;
-            	border: 3px solid white; 
-            }
-            .stats {
-            	font-size:14px;
-            	color:black;
-            	margin:10px 0;
-            }
-            
-            /* 新增样式 */
-.avatar-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
 
-.profile-info {
-    color: white; /* 文字颜色 */
-    flex: 1;
-}
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
 
-.profile-info h1 {
-    font-size: 24px;
-    margin-bottom: 8px;
-}
+        .header {
+            background: linear-gradient(45deg, #8B0000, #4B0082);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 5px solid #gold;
+            transform: translateY(-20px);
+            transition: transform 0.5s;
+        }
 
-.stats span {
-    display: block;
-    font-size: 14px;
-    line-height: 1.4;
-}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
 
-            
-            .music-control {
-            	background:none;
-            	border:none;
-            	width:90vw;
-            	height:50px;
-            	cursor:pointer;
-            	display:block;
-            	margin:0 auto;
+        .imperial-court {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .emperor-card {
+            background: #2c2c2c;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
+        }
+
+        .general-card {
+            background: #333;
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: transform 0.3s;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .general-card:hover {
+            transform: translateY(-5px);
+            background: #404040;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+
+        .position {
+            color: #9370DB;
+            font-weight: bold;
+        }
+
+        .name {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .general-link {
+            color: #FFD700;
+            text-decoration: none;
+            display: block;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            transition: opacity 0.3s;
+        }
+
+        .general-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #FFD700;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s, background 0.3s;
+            z-index: 999;
+        }
+
+        .music-control:hover {
+            transform: scale(1.1);
+            background: #ffcc00;
+        }
+
+        @media (max-width: 768px) {
+            .imperial-court {
+                grid-template-columns: 1fr;
             }
-            .music-control img {
-            	width:100%;
-            	height:auto;
-            	display:block;
-            }
-            .grid {
-            	display:grid;
-            	grid-template-columns:repeat(3,1fr);
-            	gap:2px;
-            }
-            .grid img {
-            	width:100%;
-            	height:100%;
-            	object-fit:cover;
-            	display:block;
-            }
-            .thumbnail {
-            	aspect-ratio:3/4;
-            	background:#FFFFFF;
-            	position:relative;
-            }
-            .folder-container {
-            	position:fixed;
-            	top:0;
-            	left:0;
-            	width:100vw;
-            	height:100vh;
-            	display:none;
-            	background:#000;
-            	z-index:1000;
-            }
-            .folder {
-            	width:100%;
-            	height:100%;
-            	position:relative;
-            }
-            .folder .date {
-                position: absolute;
-                bottom: 100px; /* 根据实际布局调整 */
-                left: 20px;
-                font-size: 12px;
-                font-weight: bold;
-                color: #808080;
-                text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-                z-index: 2;
-            }
-            
-            .folder .description {
-                position: absolute;
-                bottom: 80px; /* 位于日期下方 */
-                left: 20px;
-                color: white;
-                font-size: 14px;
-                max-width: 100%;
-                line-height: 1.4;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-                z-index: 2;
-            }
-            .carousel {
-            	display:flex;
-            	transition:transform 0.3s;
-            }
-            .media-item {
-            	flex:0 0 100%;
-            	height:100vh;
-            	display:flex;
-            	align-items:center;
-            	justify-content:center;
-            }
-            video,img {
-            	max-width:100%;
-            	max-height:100%;
-            	object-fit:contain;
-            }
-            .close-btn {
-            	position:absolute;
-            	top:30px;
-            	right:40px;
-            	width:60px;
-            	height:60px;
-            	background-image:url('https://mx-1341045368.cos.ap-chengdu.myqcloud.com/241226-t.jpg');
-            	background-size:cover;
-            	background-repeat:no-repeat;
-            	text-indent:-9999px;
-            	border:none;
-            	cursor:pointer;
-            	z-index:1001;
-            	border-radius:50%;
-            }
-            /* 添加加载动画*/
-            @keyframes spin {
-            	to {
-            	transform:rotate(360deg);
-            }
-            }.loading {
-            	position:fixed;
-            	top:50%;
-            	left:50%;
-            	width:30px;
-            	height:30px;
-            	border:3px solid rgba(0,0,0,0.1);
-            	border-top-color:#000;
-            	border-radius:50%;
-            	animation:spin 1s linear infinite;
-            }
-            /* 添加滑动提示箭头*/
-            .swipe-hint {
-            	position:fixed;
-            	bottom:20px;
-            	left:50%;
-            	transform:translateX(-50%);
-            	opacity:0.5;
-            	pointer-events:none;
-            	transition:opacity 0.3s;
-            	z-index:2000;
-            	animation:bounce 1s infinite;
-            }
-            @keyframes bounce {
-            	0%,100% {
-            	transform:translateY(0);
-            }
-            50% {
-            	transform:translateY(-10px);
-            }
-            }
-            .swipe-up-hint {
-            	top:20px;
-            	background:url(https://example.com/arrow-up.svg) no-repeat center/contain;
-            	width:40px;
-            	height:40px;
-            }
-            .swipe-down-hint {
-            	bottom:20px;
-            	background:url(https://example.com/arrow-down.svg) no-repeat center/contain;
-            	width:40px;
-            	height:40px;
-            }
-            /* 滑动时的动态反馈*/
-            .folder-container::after {
-            	content:"";
-            	position:absolute;
-            	top:0;
-            	left:0;
-            	width:100%;
-            	height:100%;
-            	background:rgba(255,255,255,0.1);
-            	opacity:0;
-            	transition:opacity 0.3s;
-            }
-            .swiping-up .folder-container::after {
-            	opacity:1;
-            	background:linear-gradient(to top,transparent 50%,rgba(0,0,0,0.2) 100%);
-            }
-            .swiping-down .folder-container::after {
-            	opacity:1;
-            	background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.2) 100%);
-            }
-            /* 添加文件夹切换动画*/
-            .folder-container {
-            	transition:transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
-            }
-            .swiping-up .folder-container {
-            	transform:translateY(100vh);
-            }
-            .swiping-down .folder-container {
-            	transform:translateY(-100vh);
-            }
+        }
     </style>
 </head>
 <body>
-    <div class="profile">
-        <img src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/241226-t.jpg" class="avatar" alt="头像">
-      <div class="profile-info"> <!-- 新增的文字容器 -->
-        <h1>小明同学</h1>
-        <div class="stats">
-            <span>阳高县</span>
-            <span>第一安琪拉</span>
-            <br>
-            <button class="music-control" id="musicBtn">
-                <img src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/gz.png" alt="Play Music" id="playIcon">
-            </button>
-        </div>
-        <link rel="preload" href="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/xht.mp3" as="audio">
-        <audio id="bgMusic" loop>
-            <source src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/xht.mp3" type="audio/mpeg">
-            您的浏览器不支持音频播放。
-        </audio>
-       <div class="grid"></div>
+    <header class="header">
+        <h1>出生帝国</h1>
+        <p>千秋万代，一统江山</p>
+    </header>
 
-    <template id="folderTemplate">
-        <div class="folder-container">
-            <div class="folder">
-                <div class="swipe-hint swipe-up-hint"></div>
-                <div class="swipe-hint swipe-down-hint"></div>
-                <div class="carousel"></div>
-                <div class="date"></div>
-                <div class="description"></div>
-                <audio class="bgm"></audio>
-                <div class="close-btn">close</div>
+    <div class="emperor-card">
+    <h2>皇室成员</h2>
+    <div class="position">皇帝</div>
+    <div class="name">王明霞</div>
+    <a href="https://www.csyan.asia/ming" 
+       class="general-link" 
+       target="_blank">
+        查看详情 →
+    </a>
+</div>
+
+            <div>
+                <h2>军事统帅</h2>
+                <div class="generals-grid">
+                    <!-- 大将军（静态部分） -->
+                    <div class="general-card">
+                        <div class="position">大将军</div>
+                        <div class="name">王绣朝</div>
+                        <a href="https://v.douyin.com/ifG5dP1B/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title=" 
+                           class="general-link"
+                           target="_blank">
+                            查看详情 →
+                        </a>
+                    </div>
                 </div>
+            </div>
         </div>
-    </template>
-
-   <script>  
-const BASE_URL = 'https://mx-1341045368.cos.ap-chengdu.myqcloud.com/';  
-
-const images = [
-  "250217", "250130", "250115", "250101", "250101-2",
-"241222", "241215", "241128", "241123", "241123-2",
-"241116", "000", "241109", "241103", "241102",
-"241030", "241010-1", "241005", "241001", "241001-2",
-"240930", "240923-2", "240923-1",  "240916",
-"240915", "240910", "240909", "240904", "240826",
-"240826", "000", "240804", "240624", "240618",
-"240529", "240529-2", "240528-2", "240528"
-];
-
-const grid = document.querySelector('.grid');
-images.forEach((img, index) => {
-  grid.innerHTML += `
-    <div class="thumbnail" data-folder="${index + 1}">
-      <img src="${img}-0.webp" class="thumb" alt="缩略图">
     </div>
-  `;
-});
 
-const foldersData = {  
-            1: { bgm: "250217.mp3", media: ["250217-1.mp4"],
-            date: "2025-02-17 10:49",text: "#生活碎片"},  
-            2: {media: ["250130-1.mp4"],
-            date: "2025-01-30 09:42",text: "蛟龙去，灵蛇来，巳巳如意，生生不息"},
-            3: {bgm: "250115.mp3",media: ["250115-1.mp4", "250115-2.mp4"],
-            date: "2025-01-15 11:14",text: "#人类幼崽 姨姨带娃，有福啦！"},
-            4: {bgm: "250101.mp3",media: ["250101-1.mp4", "250101-2.mp4", "250101-3.mp4", "250101-4.mp4"],
-            date: "2025-01-01 14:54",text: "#分享照片"},
-            5: {media: ["250101-11.mp4"],
-            date: "2025-01-01 01:04",text: "2025"},
-            6: {media: ["241222-1.jpg", "241222-2.jpg", "241222-3.jpg"],
-            date: "2024-12-22 23:09",text: "发个friend圈"},
-            7: {bgm: "241215.mp3",media: ["241215-1.mp4", "241215-2.mp4", "241215-3.mp4", "241215-4.webp"],
-            date: "2024-12-15 17:41",text: "#生活碎片"},
-            8: {bgm: "241128.mp3",media: ["241128-1.png"],
-            date: "2024-11-28 19:44"},
-            9: {bgm: "241123.mp3",media: ["241123-1.mp4", "241123-2.mp4", "241123-3.png"],
-            date: "2024-11-23 21:15",text: "22"},
-            10: {media: ["241123-1.jpg", "241123-2.jpg"],
-            date: "2024-11-23 20:58",text: "22"},
-            11: {bgm: "241116.mp3",media: ["241116-1.mp4"],
-            date: "2024-11-16 09:02",text: "祝自己小人得志"},
-            12: {media: ["000.png"],
-            date: "2024-11-13 04:07",text: "先帝创业未半而中道崩卒殂"},
-            13: {media: ["241109-1.png"],
-            date: "2024-11-09",text: "我是一鼎，我同意永夜星河1天十更"},
-            14: {media: ["241103-1.png"],
-            date: "2024-11-03 02:46",text: "樊宝钏"},
-            15: {bgm: "241102.mp3",media: ["241102-1.jpeg", "241102-2.jpeg", "241102-3.jpeg"],
-            date: "2024-11-02 00:07",text: "三张图，找三个人p。"},
-            16: {media: ["241030-1.png","241030-2.png","241030-3.png"],
-            date: "2024-10-30 04:07",text: "sunrise"},
-            17: {bgm: "241010.mp3",media: ["241010-1-0.webp", "241010-2.webp"],
-            date: "2024-10-10 12:37"},
-            18: {bgm: "241005.mp3",media: ["241005-1.mp4"],
-            date: "2024-10-05 18:41",text: "说遗憾也不是很遗憾说不遗憾也很遗憾"},
-            19: {bgm: "241001.mp3",media: ["241001-1.webp", "241001-2.webp", "241001-3.webp", "241001-4.webp", "241001-5.webp"],
-            date: "2024-10-01 23:18",text: "没有常青树做自己的自由花"},
-            20: {media: ["241001-1.png"],
-            date: "2024-10-01 19:38",text: "一轮明月下 共祝祖国好"},
-            21: {bgm: "240930.mp3",media: ["240930-1.mp4"],
-            date: "2024-09-30 00:20",text: "圆周率没有没有尽头，人们也只记得开头！"},
-            22: {media: ["240923-1.png","240923-2.png","240923-3.png"],
-            date: "2024-09-23 20:36",text: "人生小满胜万全"},
-            23: {bgm: "240923.mp3",media: ["240923-1-0.webp"],
-            date: "2024-09-23 01:14",text: "你承诺过的月亮，还是没有出现！"},
+    <!-- 音乐控制按钮 -->
+    <button class="music-control" id="musicBtn">🎵</button>
+
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop>
+        <source src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/xht.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放。
+    </audio>
+
+    <script>
+        // 将军数据
+        const generals = [
+            { 
+                position: "前将军",
+                name: "雷东燕",
+                link: "https://www.csyan.asia/yan"
+            },
+            { 
+                position: "左将军",
+                name: "雷东莺",
+                link: "https://v.douyin.com/ifGPnoXR/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
+            },
+            { 
+                position: "右将军",
+                name: "樊亚春",
+                link: "https://v.douyin.com/ifGPKVJ7/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
+            },
+            { 
+                position: "后将军",
+                name: "侯大宇",
+                link: "https://v.douyin.com/ifG5RYua/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
+            }
+        ];
+
+        // 动态生成将军卡片
+        const generalsGrid = document.querySelector('.generals-grid');
+        generals.forEach(general => {
+            const card = document.createElement('div');
+            card.className = 'general-card';
+            card.innerHTML = `
+                <div class="position">${general.position}</div>
+                <div class="name">${general.name}</div>
+                <a href="${general.link}" 
+                   class="general-link"
+                   target="_blank">
+                    查看详情 →
+                </a>
+            `;
+            generalsGrid.appendChild(card);
+        });
+
+        // 卡片交互效果
+        document.querySelectorAll('.general-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+
+        // 音乐控制
+        const musicBtn = document.getElementById('musicBtn');
+        const bgMusic = document.getElementById('bgMusic');
+        let isMusicPlaying = false;
+
+        musicBtn.addEventListener('click', () => {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicBtn.textContent = '🎵';
+            } else {
+                bgMusic.play();
+                musicBtn.textContent = '⏸';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+
+        // 页面加载动画和音乐自动播放
+        window.addEventListener('load', () => {
+            document.body.style.opacity = 1;
+            document.querySelector('.header').style.transform = 'translateY(0)';
             
-            24: {media: ["240916-1.png","240916-2.png","240916-3.png"],
-            date: "2024-09-16 00:56",text: "当下的快乐就是快乐"},
-            25: {bgm: "240915.mp3",media: ["240915-1.webp", "240915-2.webp"],
-            date: "2024-09-15 23:37",text: "幸福没有标准答案"},
-            26: {bgm: "240910.mp3",media: ["240910-1.jpg", "240910-2.jpg"],
-            date: "2024-09-10 23:08"},
-            27: {media: ["240909-1.png","240909-2.png","240909-3.png"],
-            date: "2024-09-09 17:48",text: "虽然我没去，但是我会蹭"},
-            28: {bgm: "240904.mp3",media: ["240904-1.mp4"],
-            date: "2024-09-04 01:28"},
-            29: {bgm: "240826.mp3",media: ["240826-1.jpg"],
-            date: "2024-08-26 22:57"},
-            30: {media: ["240826-1.mp4"],
-            date: "2024-08-26 16:58",text: "我的目标：笑死自己，笑死队友，笑死所有人。"},
-            31: {media: ["000.png"],
-            date: "2024-08-17 14:24",text: "有种卖了血之后，发现前夫拿去救小三的无力感！"},
-            32: {media: ["240804-1.jpg","240804-2.jpg"],
-            date: "2024-08-04 23:13",text: "发明这个面的人，真是个天才！"},
-            33: {bgm: "240624.mp3",media: ["240624-1.mp4"],
-            date: "2024-06-24 23:21"},
-            34: {media: ["240618-1.png","240618-2.png"],
-            date: "2024-06-18 23:11",text: "面要常见，饭要长吃."},
-            35: {media: ["240529-1.mp4"],
-            date: "2024-05-29 15:31"},
-            36: {media: ["240529-1.jpg", "240529-2.jpg", "240529-3.jpg"],
-            date: "2024-05-29 00:51",text: "小小山路，拿下拿下。"},
-            37: {media: ["240528-1.png"],
-            date: "2024-05-28"},
-            38: {media: ["240528-1.jpg", "240528-2.jpg", "240528-3.jpg", "240528-4.jpg", "240528-5.jpg", "240528-6.jpg", "240528-7.jpg", "240528-8.jpg", "240528-9.jpg"],
-            date: "2024-05-28 00:28",text: "！！！"}
-            
-                  };             
-let currentFolder = null;  
-let currentIndex = 0;  
-let currentFolderId = null; // 记录当前文件夹ID
-let isHomeScrollEnabled = true; // 控制首页滑动是否启用
-
-document.addEventListener('DOMContentLoaded', function() {
-  // 获取所有缩略图元素
-  const thumbs = document.querySelectorAll('.grid .thumb');
-  
-  // 定义基础路径
-  const basePath = 'https://mx-1341045368.cos.ap-chengdu.myqcloud.com/';
-  
-  // 遍历所有图片并更新路径
-  thumbs.forEach(img => {
-    const originalSrc = img.getAttribute('src');
-    img.src = basePath + originalSrc;
-  });
-
-    // 创建背景元素
-    const bgDiv = document.createElement('div');
-    bgDiv.style.cssText = `
-        position: absolute;
-        left: 0;
-        right: 0;
-        width: 100%;
-        background: url('https://mx-1341045368.cos.ap-chengdu.myqcloud.com/252525.webp') no-repeat center top/cover;
-        z-index: -1;
-        pointer-events: none;
-    `;
-
-    // 获取目标元素位置
-    const profile = document.querySelector('.profile');
-    const h1 = document.querySelector('h1');
-
-    function updateBackground() {
-        const h1Rect = h1.getBoundingClientRect();
-        const profileRect = profile.getBoundingClientRect();
-        
-        // 计算背景高度（从页面顶部到h1底部）
-        const topPosition = 0;
-        const bottomPosition = h1Rect.bottom - profileRect.top;
-        profileRect.top + 20; 
-        
-        bgDiv.style.top = `${topPosition}px`;
-        bgDiv.style.height = `${bottomPosition}px`;
-    }
-
-    // 初始化插入
-    profile.insertBefore(bgDiv, profile.firstChild);
-    updateBackground();
-
-    // 窗口变化时更新
-    window.addEventListener('resize', updateBackground);
-    window.addEventListener('orientationchange', updateBackground);
-});
-
-
-
-// 绑定缩略图点击事件  
-document.querySelectorAll('.thumbnail').forEach(thumb => {  
-    thumb.addEventListener('click', () => {  
-        const folderId = thumb.dataset.folder;  
-        openFolder(folderId);  
-    });  
-});  
-
-// 音乐控制逻辑  
-const musicBtn = document.getElementById('musicBtn');  
-const bgMusic = document.getElementById('bgMusic');  
-const playIcon = document.getElementById('playIcon');  
-let isMusicPlaying = false;  
-
-musicBtn.addEventListener('click', () => {  
-    if (isMusicPlaying) {  
-        bgMusic.pause();  
-        playIcon.src = BASE_URL + 'gz.png';  
-    } else {  
-        bgMusic.play();  
-        playIcon.src = BASE_URL + 'ygz.png';  
-    }  
-    isMusicPlaying = !isMusicPlaying;  
-});  
-
-// 打开文件夹  
-function openFolder(folderId) {  
-    currentFolderId = parseInt(folderId); // 记录当前文件夹ID
-    const data = foldersData[folderId];  
-    const template = document.getElementById('folderTemplate');  
-    const clone = template.content.cloneNode(true);  
-    const container = clone.querySelector('.folder-container');  
-
-    // 设置背景音乐  
-    const bgm = container.querySelector('.bgm');  
-    bgm.src = BASE_URL + data.bgm;  
-    bgm.loop = true;  
-
-    // 初始化轮播内容  
-    const carousel = container.querySelector('.carousel');  
-    data.media.forEach(file => {  
-        const item = document.createElement('div');  
-        item.className = 'media-item';  
-        if (file.endsWith('.mp4')) {  
-            const video = document.createElement('video');  
-            video.loop = true;  
-            video.innerHTML = `<source src="${BASE_URL}${file}" type="video/mp4">`;  
-            video.addEventListener('loadeddata', () => {  
-                video.volume = 1;  
-                if (currentIndex === 0) video.play();  
-            });  
-            item.appendChild(video);  
-        } else {  
-            const img = document.createElement('img');  
-            img.src = BASE_URL + file;  
-            item.appendChild(img);  
-        }  
-        carousel.appendChild(item);  
-    });  
-
-    // 添加到页面并显示  
-    document.body.appendChild(clone);  
-    container.style.display = 'block';  
-    currentFolder = container;  
-    bgm.play();  
-    
-    // 设置日期和文本
-    const dateElement = container.querySelector('.date');
-    const descElement = container.querySelector('.description');
-    dateElement.textContent = data.date;
-    descElement.textContent = data.text || ''; // 处理没有描述的情况
-
-    // 禁用首页滑动  
-    disableHomeScroll();  
-
-    // 初始化滑动逻辑  
-    initSwipe(container);  
-}  
-
-// 初始化滑动逻辑  
-function initSwipe(container) {  
-    let startX = 0;  
-    let startY = 0;  
-    let isSwiping = false;  
-    let verticalHintTimeout;
-    let isFirstInteraction = true;
-
-    container.addEventListener('touchstart', e => {  
-        startX = e.touches[0].clientX;  
-        startY = e.touches[0].clientY;  
-        isSwiping = true;  
-        // 新增：清除首次提示
-        if(isFirstInteraction) {
-            clearTimeout(verticalHintTimeout);
-            isFirstInteraction = false;
-        }
-    });  
-
-    container.addEventListener('touchmove', e => {  
-        if (!isSwiping) return;  
-        const deltaX = e.touches[0].clientX - startX;  
-        const deltaY = e.touches[0].clientY - startY;
-        container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100 + deltaX / window.innerWidth * 100}%)`;  
-   // 新增：实时垂直滑动反馈
-        if(Math.abs(deltaY) > 50) {
-            container.classList.add(deltaY > 0 ? 'swiping-down' : 'swiping-up');
-        } else {
-            container.classList.remove('swiping-up', 'swiping-down');
-        }
-        
-        container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100 + deltaX / window.innerWidth * 100}%)`;  
-    });  
-
-    container.addEventListener('touchend', e => { 
-        if (!isSwiping) return;  
-        isSwiping = false;  
-
-        const deltaX = e.changedTouches[0].clientX - startX;  
-        const deltaY = e.changedTouches[0].clientY - startY;  
-
-        // 新增：移除滑动状态类
-        container.classList.remove('swiping-up', 'swiping-down');
-
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {  
-            // 水平滑动处理  
-            if (Math.abs(deltaX) > 50) {  
-                if (deltaX > 0 && currentIndex > 0) {  
-                    currentIndex--;  
-                } else if (deltaX < 0 && currentIndex < container.querySelectorAll('.media-item').length - 1) {  
-                    currentIndex++;  
-                }  
-            }  
-            container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100}%)`;  
-            playCurrentMedia();  
-        } else {  
-            // 垂直滑动处理  
-            if (Math.abs(deltaY) > 100) {  
-            
-            // 添加切换动画类
-    container.classList.add(deltaY > 0 ? 'swiping-up' : 'swiping-down');
-    
-                closeFolder();  
-                let newFolderId = currentFolderId;  
-                if (deltaY > 0) {  
-                    newFolderId--;  
-                    if (newFolderId < 1) newFolderId = 38;  
-                } else {  
-                    newFolderId++;  
-                    if (newFolderId > 38) newFolderId = 1;  
-                }  
-                setTimeout(() => openFolder(newFolderId.toString()), 10);  
-            } else {  
-                container.querySelector('.carousel').style.transform = `translateX(${-currentIndex * 100}%)`;  
-            }  
-        }  
-    });  
-
-    // 关闭按钮逻辑  
-    container.querySelector('.close-btn').addEventListener('click', () => {  
-        closeFolder();  
-    });  
-    
-    function showVerticalHint(direction) {
-  const container = currentFolder.querySelector('.folder-container');
-  container.classList.add(`show-${direction}-hint`);
-  
-  clearTimeout(verticalHintTimeout);
-  verticalHintTimeout = setTimeout(() => {
-    container.classList.remove(`show-${direction}-hint`);
-  }, 1000);
-}
-}  
-
-// 播放当前媒体  
-function playCurrentMedia() {  
-    const currentItem = currentFolder.querySelectorAll('.media-item')[currentIndex];  
-    const video = currentItem.querySelector('video');  
-    if (video) {  
-        video.currentTime = 0;  
-        video.play();  
-    }  
-}  
-
-// 关闭文件夹  
-function closeFolder() {  
-    currentFolder.remove();  
-    currentFolder = null;  
-    currentIndex = 0;  
-
-    // 重新启用首页滑动  
-    enableHomeScroll();  
-}  
-
-// 获取缩略图路径  
-function getThumbnail(file) {  
-    if (file.endsWith('.mp4')) {  
-        return file.replace('.mp4', '-0.webp');  
-    }  
-    return file;  
-}  
-
-// 禁用首页滑动  
-function disableHomeScroll() {  
-    isHomeScrollEnabled = false;  
-    document.body.style.overflow = 'hidden'; // 禁用页面滚动  
-}  
-
-// 启用首页滑动  
-function enableHomeScroll() {  
-    isHomeScrollEnabled = true;  
-    document.body.style.overflow = 'auto'; // 恢复页面滚动  
-}  
-
-// 监听首页滑动事件  
-document.addEventListener('touchmove', (e) => {  
-    if (!isHomeScrollEnabled) {  
-        e.preventDefault(); // 如果首页滑动被禁用，阻止默认行为  
-    }  
-}, { passive: false });  
-
-// 将功能拆分为模块
-const MediaPlayer = {
-  init() {
-    this.bindEvents();
-  },
-  
-  bindEvents() {
-    // 事件绑定逻辑
-  }
-};
-
-const FolderViewer = {
-  // 文件夹相关逻辑
-};
-
-// 将配置数据独立
-const CONFIG = {
-  baseUrl: 'https://mx-1341045368.cos.ap-chengdu.myqcloud.com/',
-  folders: { /* ... */ },
-  defaultAvatar: '241226-t.jpg'
-};
-
-// 改进关闭逻辑
-function closeFolder() {
-  if (currentFolder) {
-    // 停止所有媒体播放
-    currentFolder.querySelectorAll('video, audio').forEach(media => {
-      media.pause();
-      media.src = '';
-      media.load();
-    });
-    
-    currentFolder.remove();
-    currentFolder = null;
-    currentIndex = 0;
-  }
-  enableHomeScroll();
-}
-
-// 添加媒体错误处理
-function createMediaElement(file) {
-  const media = file.endsWith('.mp4') ? 
-    document.createElement('video') : 
-    document.createElement('img');
-
-  media.onerror = () => {
-    console.error('Failed to load:', file);
-    media.parentElement?.remove();
-  };
-  
-  return media;
-}
-</script>  
+            // 用户交互后自动播放音乐
+            document.addEventListener('click', () => {
+                if (!isMusicPlaying) {
+                    bgMusic.play();
+                    musicBtn.textContent = '⏸';
+                    isMusicPlaying = true;
+                }
+            }, { once: true });
+        });
+    </script>
 </body>
 </html>
