@@ -254,7 +254,7 @@ const images = [
 "240930", "240923-2", "240923-1",  "240916",
 "240915", "240910", "240909", "240904", "240826",
 "240826", "240804", "240624", "240618",
-"240529", "240529-2", "240528-2", "240528"
+"240529", "240529-2", "240528"
 ];
 
 const grid = document.querySelector('.grid');
@@ -339,9 +339,8 @@ const foldersData = {
             date: "2024-05-29 15:31"},
             35: {media: ["240529-1.jpg", "240529-2.jpg", "240529-3.jpg"],
             date: "2024-05-29 00:51",text: "小小山路，拿下拿下。"},
-            36: {media: ["240528-1.png"],
-            date: "2024-05-28"},
-            37: {media: ["240528-1.jpg", "240528-2.jpg", "240528-3.jpg", "240528-4.jpg", "240528-5.jpg", "240528-6.jpg", "240528-7.jpg", "240528-8.jpg", "240528-9.jpg"],
+            
+            36: {media: ["240528-1.jpg", "240528-2.jpg", "240528-3.jpg", "240528-4.jpg", "240528-5.jpg", "240528-6.jpg", "240528-7.jpg", "240528-8.jpg", "240528-9.jpg"],
             date: "2024-05-28 00:28",text: "！！！"}
             
                   };             
@@ -509,10 +508,10 @@ function initSwipe(container) {
                 let newFolderId = currentFolderId;  
                 if (deltaY > 0) {  
                     newFolderId--;  
-                    if (newFolderId < 1) newFolderId = 37;  
+                    if (newFolderId < 1) newFolderId = 36;  
                 } else {  
                     newFolderId++;  
-                    if (newFolderId > 37) newFolderId = 1;  
+                    if (newFolderId > 36) newFolderId = 1;  
                 }  
                 setTimeout(() => openFolder(newFolderId.toString()), 10);  
             } else {  
