@@ -106,7 +106,7 @@
       }
      .folder .date {
     position: absolute;
-    bottom: 12%; /* 使用百分比，根据容器高度调整 */
+    bottom: 10%; /* 使用百分比，根据容器高度调整 */
     left: 5%; /* 使用百分比，根据容器宽度调整 */
     font-size: clamp(16px, 1.5vw, 24px); /* 使用 clamp 函数限制最小和最大字体大小 */
     font-weight: bold;
@@ -117,7 +117,7 @@
 
 .folder .description {
     position: absolute;
-    bottom: 8%; /* 使用百分比，根据容器高度调整 */
+    bottom: 5%; /* 使用百分比，根据容器高度调整 */
     left: 5%; /* 使用百分比，根据容器宽度调整 */
     color: white;
     font-size: clamp(20px, 4vw, 32px); /* 使用 clamp 函数限制最小和最大字体大小 */
@@ -127,26 +127,7 @@
     z-index: 2;
 }
 
-/* 媒体查询，针对不同设备进一步调整 */
-@media (max-width: 768px) {
-    .folder .date {
-        font-size: clamp(14px, 2.5vw, 20px); /* 小屏幕下调整字体大小 */
-    }
 
-    .folder .description {
-        font-size: clamp(18px, 4vw, 28px); /* 小屏幕下调整字体大小 */
-    }
-}
-
-@media (min-width: 1200px) {
-    .folder .date {
-        font-size: clamp(18px, 2.5vw, 28px); /* 大屏幕下调整字体大小 */
-    }
-
-    .folder .description {
-        font-size: clamp(24px, 4vw, 36px); /* 大屏幕下调整字体大小 */
-    }
-}
 
       .carousel {
         display: flex;
