@@ -29,6 +29,20 @@
       .exit-button:hover {
         background-color: rgba(0, 0, 0, 0.8);
       }
+      .more-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #fff; 
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.more-btn:hover {
+  background-color: #808080; /* 悬停时变深 */
+}
       .profile {
         position: relative;
         color: black;
@@ -41,7 +55,7 @@
       }
       .header {
         position: absolute;
-        bottom: 89%;
+        top: 18vw;
         left: 5%;
         display: flex;
         align-items: center;
@@ -79,23 +93,32 @@
         height: auto;
         display: block;
       }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 2px;
-        margin-top: 20px;
-      }
-      .grid img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .thumbnail {
-        aspect-ratio: 3/4;
-        background: #ffffff;
-        position: relative;
-      }
+      
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 20px;
+}
+.grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.thumbnail {
+    aspect-ratio: 3/4;
+    background: #ffffff;
+    position: relative;
+}
+
+/* 电脑端样式 */
+@media (min-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
       .folder-container {
         position: fixed;
         top: 0;
