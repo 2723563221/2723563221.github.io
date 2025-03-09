@@ -84,10 +84,18 @@
         font-size: 4vw;
         margin: 10px 0;
       }
+      .stats a{
+            text-decoration: none;
+            color: #0d4985;
+        }
       .music-control {
-        width: 100%;
-        margin: 10px auto;
-      }
+    width: 95%;
+    margin: 10px auto;
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center;     /* 垂直居中 */
+}
+
       .music-control img {
         width: 100%;
         height: auto;
