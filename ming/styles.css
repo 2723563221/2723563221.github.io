@@ -36,15 +36,15 @@ body {
   display: inline-block;
   padding: 10px 20px;
   background-color: #fff;
-  color: #000; /* 修改颜色为黑色以确保可见 */
+  color: #75757d; 
   text-decoration: none;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 3.8vw;
   transition: background-color 0.3s ease;
 }
 
 .more-btn:hover {
-  background-color: #808080;
+  background-color: #fff;
 }
 
 .profile {
@@ -81,7 +81,7 @@ h1 {
   font-size: 7vw;
   margin: 0;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-  color: #ffffff;
+  color: #fff;
   font-weight: bold;
 }
 
