@@ -149,7 +149,7 @@ let currentFolder = null;
 let currentIndex = 0;
 let currentFolderId = null;
 let isHomeScrollEnabled = true;
-let isMediaPlaying = false; // Added to track playback state
+let isMediaPlaying = false;
 
 // 页面加载完成后，更新所有缩略图的图片路径
 document.addEventListener("DOMContentLoaded", function () {
@@ -184,6 +184,13 @@ musicBtn.addEventListener("click", () => {
   }
   isMusicPlaying = !isMusicPlaying;
 });
+
+// 计算两点之间的距离，用于捏合缩放
+function getDistance(touch1, touch2) {
+  const dx = touch1.clientX - touch2.clientX;
+  const dy = touch1.clientY - touch2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
 
 // 打开指定文件夹，加载文件夹内容并显示
 function openFolder(folderId) {
@@ -223,9 +230,9 @@ function openFolder(folderId) {
   container.style.display = "block";
   currentFolder = container;
   currentIndex = 0;
-  isMediaPlaying = true; // Initialize playback state
+  isMediaPlaying = true;
   if (data.bgm) bgm.play();
-  playCurrentMedia(); // Start media playback
+  playCurrentMedia();
 
   const dateElement = container.querySelector(".date");
   const descElement = container.querySelector(".description");
@@ -236,7 +243,7 @@ function openFolder(folderId) {
   initSwipe(container);
 }
 
-// 切换文件夹，带有动画效果并加载新文件夹内容
+// 切换文件夹，带有动画效果并加载新文件夹内容，重置缩放为1倍
 function switchFolder(newFolderId, direction) {
   const newData = foldersData[newFolderId];
   const template = document.getElementById("folderTemplate");
@@ -253,6 +260,7 @@ function switchFolder(newFolderId, direction) {
   newData.media.forEach((file) => {
     const item = document.createElement("div");
     item.className = "media-item";
+    item.style.transform = "scale(1)"; // 重置缩放为1倍
     if (file.endsWith(".mp4")) {
       const video = document.createElement("video");
       video.loop = true;
@@ -302,71 +310,101 @@ function switchFolder(newFolderId, direction) {
     currentFolder = newContainer;
     currentFolderId = parseInt(newFolderId);
     currentIndex = 0;
-    isMediaPlaying = true; // Initialize playback state
+    isMediaPlaying = true;
     if (newData.bgm) newBgm.play();
-    playCurrentMedia(); // Start media playback
+    playCurrentMedia();
     initSwipe(newContainer);
   }, 300);
 }
 
-// 初始化触摸滑动事件，支持左右滑动切换媒体和上下滑动切换文件夹
+// 初始化触摸事件，支持滑动切换和双指缩放
 function initSwipe(container) {
   let startX = 0;
   let startY = 0;
-  let isSwiping = false;
+  let gestureMode = null;
+  let pinchStartScale = 1;
+  let initialDistance = 0;
 
   container.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    isSwiping = true;
+    if (e.touches.length === 1) {
+      gestureMode = "swipe";
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      gestureMode = "pinch";
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      initialDistance = getDistance(touch1, touch2);
+      const currentMediaItem = container.querySelectorAll(".media-item")[currentIndex];
+      const currentTransform = currentMediaItem.style.transform;
+      pinchStartScale = currentTransform
+        ? parseFloat(currentTransform.match(/scale\(([^)]+)\)/)?.[1]) || 1
+        : 1;
+    }
   });
 
   container.addEventListener("touchmove", (e) => {
-    if (!isSwiping) return;
-    const deltaX = e.touches[0].clientX - startX;
-    const deltaY = e.touches[0].clientY - startY;
-    container.querySelector(".carousel").style.transform = `translateX(${
-      -currentIndex * 100 + (deltaX / window.innerWidth) * 100
-    }%)`;
+    if (gestureMode === "swipe" && e.touches.length === 1) {
+      const deltaX = e.touches[0].clientX - startX;
+      container.querySelector(".carousel").style.transform = `translateX(${
+        -currentIndex * 100 + (deltaX / window.innerWidth) * 100
+      }%)`;
+    } else if (gestureMode === "pinch" && e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const newDistance = getDistance(touch1, touch2);
+      const scaleFactor = newDistance / initialDistance;
+      let newScale = pinchStartScale * scaleFactor;
+      const minScale = 0.4;
+      const maxScale = 4;
+      newScale = Math.min(Math.max(newScale, minScale), maxScale);
+      const currentMediaItem = container.querySelectorAll(".media-item")[currentIndex];
+      currentMediaItem.style.transform = `scale(${newScale})`;
+    }
   });
 
   container.addEventListener("touchend", (e) => {
-    if (!isSwiping) return;
-    isSwiping = false;
-
-    const deltaX = e.changedTouches[0].clientX - startX;
-    const deltaY = e.changedTouches[0].clientY - startY;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (Math.abs(deltaX) > 50) {
-        if (deltaX > 0 && currentIndex > 0) {
-          currentIndex--;
-        } else if (
-          deltaX < 0 &&
-          currentIndex < container.querySelectorAll(".media-item").length - 1
-        ) {
-          currentIndex++;
-        }
-      }
-      container.querySelector(".carousel").style.transform = `translateX(${-currentIndex * 100}%)`;
-      if (isMediaPlaying) {
-        playCurrentMedia(); // Play only if media is enabled
-      }
-    } else {
-      if (Math.abs(deltaY) > 100) {
-        let newFolderId = currentFolderId;
-        if (deltaY > 0) {
-          newFolderId--;
-          if (newFolderId < 1) newFolderId = 19;
-          switchFolder(newFolderId.toString(), "up");
+    if (e.touches.length === 0) {
+      if (gestureMode === "swipe") {
+        const deltaX = e.changedTouches[0].clientX - startX;
+        const deltaY = e.changedTouches[0].clientY - startY;
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          if (Math.abs(deltaX) > 50) {
+            if (deltaX > 0 && currentIndex > 0) {
+              currentIndex--;
+            } else if (
+              deltaX < 0 &&
+              currentIndex < container.querySelectorAll(".media-item").length - 1
+            ) {
+              currentIndex++;
+            }
+            // 重置所有媒体项的缩放为1倍
+            container.querySelectorAll(".media-item").forEach((item) => {
+              item.style.transform = "scale(1)";
+            });
+          }
+          container.querySelector(".carousel").style.transform = `translateX(${-currentIndex * 100}%)`;
+          if (isMediaPlaying) {
+            playCurrentMedia();
+          }
         } else {
-          newFolderId++;
-          if (newFolderId > 19) newFolderId = 1;
-          switchFolder(newFolderId.toString(), "down");
+          if (Math.abs(deltaY) > 100) {
+            let newFolderId = currentFolderId;
+            if (deltaY > 0) {
+              newFolderId--;
+              if (newFolderId < 1) newFolderId = 19;
+              switchFolder(newFolderId.toString(), "up");
+            } else {
+              newFolderId++;
+              if (newFolderId > 19) newFolderId = 1;
+              switchFolder(newFolderId.toString(), "down");
+            }
+          } else {
+            container.querySelector(".carousel").style.transform = `translateX(${-currentIndex * 100}%)`;
+          }
         }
-      } else {
-        container.querySelector(".carousel").style.transform = `translateX(${-currentIndex * 100}%)`;
       }
+      gestureMode = null;
     }
   });
 
@@ -374,10 +412,9 @@ function initSwipe(container) {
     closeFolder();
   });
 
-  // Added: Click to toggle playback of BGM and MP4
   container.addEventListener("click", (e) => {
     if (container.querySelector(".close-btn").contains(e.target)) {
-      return; // Ignore clicks on the close button
+      return;
     }
     isMediaPlaying = !isMediaPlaying;
     const bgm = container.querySelector(".bgm");
@@ -399,7 +436,7 @@ function playCurrentMedia() {
     const currentItem = currentFolder.querySelectorAll(".media-item")[currentIndex];
     const video = currentItem.querySelector("video");
     if (video) {
-      video.currentTime = 0; // Start from beginning when switching or resuming
+      video.currentTime = 0;
       video.play();
     }
   }
@@ -417,7 +454,7 @@ function closeFolder() {
     currentFolder = null;
     currentIndex = 0;
     currentFolderId = null;
-    isMediaPlaying = false; // Reset playback state
+    isMediaPlaying = false;
   }
   enableHomeScroll();
 }
