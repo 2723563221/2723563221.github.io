@@ -1,7 +1,4 @@
 const BASE_URL = "https://mx-1341045368.cos.ap-chengdu.myqcloud.com/";
-function exitPage() {
-  window.location.href = "https://www.csyan.asia";
-}
 
 const images = [
   "250227",
@@ -145,13 +142,16 @@ const foldersData = {
   },
 };
 
+function exitPage() {
+  window.location.href = "https://www.csyan.asia";
+}
+
 let currentFolder = null;
 let currentIndex = 0;
 let currentFolderId = null;
 let isHomeScrollEnabled = true;
 let isMediaPlaying = false;
 
-// 页面加载完成后，更新所有缩略图的图片路径
 document.addEventListener("DOMContentLoaded", function () {
   const thumbs = document.querySelectorAll(".grid .thumb");
   thumbs.forEach((img) => {
@@ -160,7 +160,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// 为所有缩略图添加点击事件，点击时打开对应文件夹
 document.querySelectorAll(".thumbnail").forEach((thumb) => {
   thumb.addEventListener("click", () => {
     const folderId = thumb.dataset.folder;
@@ -168,7 +167,6 @@ document.querySelectorAll(".thumbnail").forEach((thumb) => {
   });
 });
 
-// 控制背景音乐播放与暂停，并切换播放按钮图标
 const musicBtn = document.getElementById("musicBtn");
 const bgMusic = document.getElementById("bgMusic");
 const playIcon = document.getElementById("playIcon");
@@ -185,14 +183,12 @@ musicBtn.addEventListener("click", () => {
   isMusicPlaying = !isMusicPlaying;
 });
 
-// 计算两点之间的距离，用于捏合缩放
 function getDistance(touch1, touch2) {
   const dx = touch1.clientX - touch2.clientX;
   const dy = touch1.clientY - touch2.clientY;
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-// 打开指定文件夹，加载文件夹内容并显示
 function openFolder(folderId) {
   currentFolderId = parseInt(folderId);
   const data = foldersData[folderId];
@@ -207,7 +203,8 @@ function openFolder(folderId) {
   }
 
   const carousel = container.querySelector(".carousel");
-  data.media.forEach((file) => {
+  carousel.style.transition = "transform 0.3s ease";
+  data.media.forEach((file, index) => {
     const item = document.createElement("div");
     item.className = "media-item";
     if (file.endsWith(".mp4")) {
@@ -226,6 +223,8 @@ function openFolder(folderId) {
     carousel.appendChild(item);
   });
 
+  preloadAdjacentMedia(data.media, 0);
+
   document.body.appendChild(clone);
   container.style.display = "block";
   currentFolder = container;
@@ -243,7 +242,26 @@ function openFolder(folderId) {
   initSwipe(container);
 }
 
-// 切换文件夹，带有动画效果并加载新文件夹内容，重置缩放为1倍
+function preloadAdjacentMedia(mediaList, currentIndex) {
+  const prevIndex = (currentIndex - 1 + mediaList.length) % mediaList.length;
+  const nextIndex = (currentIndex + 1) % mediaList.length;
+
+  const preloadMedia = (index) => {
+    const file = mediaList[index];
+    if (file.endsWith(".mp4")) {
+      const video = document.createElement("video");
+      video.src = BASE_URL + file;
+      video.preload = "auto";
+    } else {
+      const img = new Image();
+      img.src = BASE_URL + file;
+    }
+  };
+
+  preloadMedia(prevIndex);
+  preloadMedia(nextIndex);
+}
+
 function switchFolder(newFolderId, direction) {
   const newData = foldersData[newFolderId];
   const template = document.getElementById("folderTemplate");
@@ -257,10 +275,11 @@ function switchFolder(newFolderId, direction) {
   }
 
   const newCarousel = newContainer.querySelector(".carousel");
+  newCarousel.style.transition = "transform 0.3s ease";
   newData.media.forEach((file) => {
     const item = document.createElement("div");
     item.className = "media-item";
-    item.style.transform = "scale(1)"; // 重置缩放为1倍
+    item.style.transform = "scale(1)";
     if (file.endsWith(".mp4")) {
       const video = document.createElement("video");
       video.loop = true;
@@ -276,6 +295,8 @@ function switchFolder(newFolderId, direction) {
     }
     newCarousel.appendChild(item);
   });
+
+  preloadAdjacentMedia(newData.media, 0);
 
   const newDateElement = newContainer.querySelector(".date");
   const newDescElement = newContainer.querySelector(".description");
@@ -317,13 +338,16 @@ function switchFolder(newFolderId, direction) {
   }, 300);
 }
 
-// 初始化触摸事件，支持滑动切换和双指缩放
 function initSwipe(container) {
   let startX = 0;
   let startY = 0;
   let gestureMode = null;
   let pinchStartScale = 1;
+  let pinchStartTranslateX = 0;
+  let pinchStartTranslateY = 0;
   let initialDistance = 0;
+  let initialCenterX = 0;
+  let initialCenterY = 0;
 
   container.addEventListener("touchstart", (e) => {
     if (e.touches.length === 1) {
@@ -335,58 +359,87 @@ function initSwipe(container) {
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       initialDistance = getDistance(touch1, touch2);
+      initialCenterX = (touch1.clientX + touch2.clientX) / 2;
+      initialCenterY = (touch1.clientY + touch2.clientY) / 2;
       const currentMediaItem = container.querySelectorAll(".media-item")[currentIndex];
-      const currentTransform = currentMediaItem.style.transform;
-      pinchStartScale = currentTransform
-        ? parseFloat(currentTransform.match(/scale\(([^)]+)\)/)?.[1]) || 1
-        : 1;
+      const style = window.getComputedStyle(currentMediaItem);
+      const transform = style.transform;
+      const matrix = transform.match(/^matrix\((.+)\)$/);
+      if (matrix) {
+        const values = matrix[1].split(", ");
+        pinchStartScale = parseFloat(values[0]);
+        pinchStartTranslateX = parseFloat(values[4]);
+        pinchStartTranslateY = parseFloat(values[5]);
+      } else {
+        pinchStartScale = 1;
+        pinchStartTranslateX = 0;
+        pinchStartTranslateY = 0;
+      }
     }
   });
 
   container.addEventListener("touchmove", (e) => {
     if (gestureMode === "swipe" && e.touches.length === 1) {
       const deltaX = e.touches[0].clientX - startX;
-      container.querySelector(".carousel").style.transform = `translateX(${
-        -currentIndex * 100 + (deltaX / window.innerWidth) * 100
-      }%)`;
+      const carousel = container.querySelector(".carousel");
+      const totalItems = container.querySelectorAll(".media-item").length;
+      
+      let translateX = -currentIndex * 100 + (deltaX / window.innerWidth) * 100;
+      if (currentIndex === 0 && deltaX > 0) {
+        translateX = 0; 
+      } else if (currentIndex === totalItems - 1 && deltaX < 0) {
+        translateX = -currentIndex * 100; 
+      }
+      
+      carousel.style.transition = "none";
+      carousel.style.transform = `translateX(${translateX}%)`;
     } else if (gestureMode === "pinch" && e.touches.length === 2) {
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       const newDistance = getDistance(touch1, touch2);
       const scaleFactor = newDistance / initialDistance;
       let newScale = pinchStartScale * scaleFactor;
-      const minScale = 0.4;
-      const maxScale = 4;
+      const minScale = 0.1;
+      const maxScale = 7;
       newScale = Math.min(Math.max(newScale, minScale), maxScale);
+
+      const newCenterX = (touch1.clientX + touch2.clientX) / 2;
+      const newCenterY = (touch1.clientY + touch2.clientY) / 2;
+      const deltaCenterX = newCenterX - initialCenterX;
+      const deltaCenterY = newCenterY - initialCenterY;
+
       const currentMediaItem = container.querySelectorAll(".media-item")[currentIndex];
-      currentMediaItem.style.transform = `scale(${newScale})`;
+      const rect = currentMediaItem.getBoundingClientRect();
+      const translateX = pinchStartTranslateX + deltaCenterX;
+      const translateY = pinchStartTranslateY + deltaCenterY;
+
+      currentMediaItem.style.transition = "none";
+      currentMediaItem.style.transform = `translate(${translateX}px, ${translateY}px) scale(${newScale})`;
+      currentMediaItem.style.transformOrigin = "center center";
     }
   });
 
   container.addEventListener("touchend", (e) => {
     if (e.touches.length === 0) {
+      const carousel = container.querySelector(".carousel");
+      const totalItems = container.querySelectorAll(".media-item").length;
+      
       if (gestureMode === "swipe") {
         const deltaX = e.changedTouches[0].clientX - startX;
         const deltaY = e.changedTouches[0].clientY - startY;
+
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          if (Math.abs(deltaX) > 50) {
+          carousel.style.transition = "transform 0.3s ease";
+          if (Math.abs(deltaX) > 65) {
             if (deltaX > 0 && currentIndex > 0) {
-              currentIndex--;
-            } else if (
-              deltaX < 0 &&
-              currentIndex < container.querySelectorAll(".media-item").length - 1
-            ) {
-              currentIndex++;
+              currentIndex--; // 只在不是第一个时允许左滑
+            } else if (deltaX < 0 && currentIndex < totalItems - 1) {
+              currentIndex++; // 只在不是最后一个时允许右滑
             }
-            // 重置所有媒体项的缩放为1倍
-            container.querySelectorAll(".media-item").forEach((item) => {
-              item.style.transform = "scale(1)";
-            });
           }
-          container.querySelector(".carousel").style.transform = `translateX(${-currentIndex * 100}%)`;
-          if (isMediaPlaying) {
-            playCurrentMedia();
-          }
+          carousel.style.transform = `translateX(${-currentIndex * 100}%)`;
+          if (isMediaPlaying) playCurrentMedia();
+          preloadAdjacentMedia(foldersData[currentFolderId].media, currentIndex);
         } else {
           if (Math.abs(deltaY) > 100) {
             let newFolderId = currentFolderId;
@@ -400,9 +453,15 @@ function initSwipe(container) {
               switchFolder(newFolderId.toString(), "down");
             }
           } else {
-            container.querySelector(".carousel").style.transform = `translateX(${-currentIndex * 100}%)`;
+            carousel.style.transition = "transform 0.3s ease";
+            carousel.style.transform = `translateX(${-currentIndex * 100}%)`;
           }
         }
+      } else if (gestureMode === "pinch") {
+        const currentMediaItem = container.querySelectorAll(".media-item")[currentIndex];
+        currentMediaItem.style.transition = "transform 0.3s ease";
+        currentMediaItem.style.transform = "translate(0px, 0px) scale(1)";
+        currentMediaItem.style.transformOrigin = "center center";
       }
       gestureMode = null;
     }
@@ -413,9 +472,7 @@ function initSwipe(container) {
   });
 
   container.addEventListener("click", (e) => {
-    if (container.querySelector(".close-btn").contains(e.target)) {
-      return;
-    }
+    if (container.querySelector(".close-btn").contains(e.target)) return;
     isMediaPlaying = !isMediaPlaying;
     const bgm = container.querySelector(".bgm");
     const currentItem = container.querySelectorAll(".media-item")[currentIndex];
@@ -430,7 +487,6 @@ function initSwipe(container) {
   });
 }
 
-// 播放当前选中的媒体（视频）
 function playCurrentMedia() {
   if (isMediaPlaying) {
     const currentItem = currentFolder.querySelectorAll(".media-item")[currentIndex];
@@ -442,7 +498,6 @@ function playCurrentMedia() {
   }
 }
 
-// 关闭当前文件夹并清理资源
 function closeFolder() {
   if (currentFolder) {
     currentFolder.querySelectorAll("video, audio").forEach((media) => {
@@ -459,19 +514,16 @@ function closeFolder() {
   enableHomeScroll();
 }
 
-// 禁用主页滚动
 function disableHomeScroll() {
   isHomeScrollEnabled = false;
   document.body.style.overflow = "hidden";
 }
 
-// 启用主页滚动
 function enableHomeScroll() {
   isHomeScrollEnabled = true;
   document.body.style.overflow = "auto";
 }
 
-// 阻止触摸滚动（当主页滚动被禁用时）
 document.addEventListener(
   "touchmove",
   (e) => {
