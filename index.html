@@ -3,247 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>出生帝国官方网站</title>
+    <title>出生帝国 - 官方网站</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: '微软雅黑', sans-serif;
         }
 
         body {
-            background: #1a1a1a;
-            color: #fff;
-            opacity: 0;
-            transition: opacity 0.5s;
+            background: #f8f9fa;
+            color: #2d3436;
+            line-height: 1.5;
+            font-size: 14px; /* 基础字体缩小，适配手机 */
         }
 
-        .header {
-            background: linear-gradient(45deg, #8B0000, #4B0082);
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 5px solid #gold;
-            transform: translateY(-20px);
-            transition: transform 0.5s;
+        /* 导航栏 */
+        nav {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .imperial-court {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .emperor-card {
-            background: #2c2c2c;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
-        }
-
-        .general-card {
-            background: #333;
-            padding: 1.5rem;
-            border-radius: 8px;
-            transition: transform 0.3s;
-            cursor: pointer;
-            margin-bottom: 1rem;
-        }
-
-        .general-card:hover {
-            transform: translateY(-5px);
-            background: #404040;
-        }
-
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        h2 {
-            color: #FFD700;
-            margin-bottom: 1rem;
-        }
-
-        .position {
-            color: #9370DB;
-            font-weight: bold;
-        }
-
-        .name {
-            font-size: 1.2rem;
-            margin: 0.5rem 0;
-        }
-
-        .general-link {
-            color: #FFD700;
+        nav a {
+            color: white;
             text-decoration: none;
-            display: block;
-            margin-top: 0.8rem;
-            font-size: 0.9rem;
+            margin: 0 1.5rem;
+            font-size: 16px; /* 导航字体稍大，保持可读性 */
+            font-weight: 500;
             transition: opacity 0.3s;
         }
 
-        .general-link:hover {
-            opacity: 0.8;
-            text-decoration: underline;
+        nav a:hover {
+            opacity: 0.85;
         }
 
-        .music-control {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #FFD700;
-            color: #1a1a1a;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        /* 主要内容容器 */
+        .container {
+            max-width: 100%;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        /* 成员展示 */
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .member-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .member-title {
+            font-size: 16px; /* 标题稍大，突出层次 */
+            color: #2c3e50;
+            margin: 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .member-card p {
+            font-size: 14px; /* 正文字体缩小 */
+            color: #636e72;
+        }
+
+        .btn-detail {
+            display: inline-block;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            text-decoration: none;
+            margin-top: 0.5rem;
+            font-size: 12px; /* 按钮字体缩小 */
+            transition: transform 0.2s;
+        }
+
+        .btn-detail:hover {
+            transform: scale(1.05);
+        }
+
+        /* 皇帝卡片 */
+        .emperor-card {
+            grid-column: 1 / -1;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+        }
+
+        .emperor-card .member-title {
+            color: white;
+            font-size: 18px; /* 皇帝标题稍大 */
+        }
+
+        .emperor-card p {
+            color: #f1f2f6;
+        }
+
+        /* 将军卡片 */
+        .general-card {
+            padding: 1rem;
+            background: #f1f2f6;
+        }
+
+        /* 后将军居中 */
+        .rear-general-container {
+            grid-column: 1 / -1;
             display: flex;
-            align-items: center;
             justify-content: center;
-            transition: transform 0.3s, background 0.3s;
-            z-index: 999;
         }
 
-        .music-control:hover {
-            transform: scale(1.1);
-            background: #ffcc00;
+        .rear-general-container .member-card {
+            max-width: 60%; /* 后将军卡片宽度适中 */
         }
 
-        @media (max-width: 768px) {
-            .imperial-court {
-                grid-template-columns: 1fr;
-            }
+        /* 历程时间线 */
+        .timeline {
+            position: relative;
+            padding: 1.5rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.8rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #3498db;
+        }
+
+        .timeline-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: relative;
+            margin-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 1rem;
+            width: 10px;
+            height: 10px;
+            background: #3498db;
+            border-radius: 50%;
+        }
+
+        .timeline h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 16px; /* 时间线标题缩小 */
+        }
+
+        .timeline p, .timeline ul {
+            font-size: 14px; /* 时间线内容字体缩小 */
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 12px;
+        }
+
+        .section-title {
+            font-size: 20px; /* 章节标题缩小 */
+            text-align: center;
+            margin: 2rem 0;
+            color: #2c3e50;
+            position: relative;
+            font-weight: 700;
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: #3498db;
+            margin: 0.5rem auto;
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1>出生帝国</h1>
-        <p>千秋万代，一统江山</p>
-    </header>
+    <nav>
+        <a href="#members">核心成员</a>
+        <a href="#history">帝国历程</a>
+    </nav>
 
-    <div class="emperor-card">
-    <h2>皇室成员</h2>
-    <div class="position">皇帝</div>
-    <div class="name">王明霞</div>
-    <a href="https://www.csyan.asia/ming" 
-       class="general-link" 
-       target="_blank">
-        查看详情 →
-    </a>
-</div>
+    <div class="container">
+        <!-- 成员介绍 -->
+        <section id="members">
+            <h2 class="section-title">帝国核心成员</h2>
+            <div class="members-grid">
+                <!-- 第一行：皇帝 -->
+                <div class="member-card emperor-card">
+                    <h3 class="member-title">👑 出生皇帝</h3>
+                    <p>明</p>
+                    <a href="https://www.csyan.asia/ming" target="_blank" class="btn-detail">查看详情</a>
+                </div>
 
-            <div>
-                <h2>军事统帅</h2>
-                <div class="generals-grid">
-                    <!-- 大将军（静态部分） -->
-                    <div class="general-card">
-                        <div class="position">大将军</div>
-                        <div class="name">王绣朝</div>
-                        <a href="https://v.douyin.com/ifG5dP1B/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title=" 
-                           class="general-link"
-                           target="_blank">
-                            查看详情 →
-                        </a>
+                <!-- 第二行：大将军和前将军 -->
+                <div class="member-card general-card">
+                    <h3 class="member-title">⚔️ 出生大将军</h3>
+                    <p>朝</p>
+                    <a href="https://www.csyan.asia/chao" target="_blank" class="btn-detail">查看详情</a>
+                </div>
+                <div class="member-card general-card">
+                    <h3 class="member-title">🛡️ 出生前将军</h3>
+                    <p>燕</p>
+                    <a href="https://www.csyan.asia/yan" target="_blank" class="btn-detail">查看详情</a>
+                </div>
+
+                <!-- 第三行：左将军和右将军 -->
+                <div class="member-card general-card">
+                    <h3 class="member-title">🗡️ 出生左将军</h3>
+                    <p>莺</p>
+                    <a href="https://www.csyan.asia/ying" target="_blank" class="btn-detail">查看详情</a>
+                </div>
+                <div class="member-card general-card">
+                    <h3 class="member-title">🏹 出生右将军</h3>
+                    <p>梓</p>
+                    <a href="https://www.csyan.asia/zi" target="_blank" class="btn-detail">查看详情</a>
+                </div>
+
+                <!-- 第四行：后将军居中 -->
+                <div class="rear-general-container">
+                    <div class="member-card general-card">
+                        <h3 class="member-title">🛡️ 出生后将军</h3>
+                        <p>宇</p>
+                        <a href="https://www.csyan.asia/yu" target="_blank" class="btn-detail">查看详情</a>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- 历程部分 -->
+        <section id="history">
+            <h2 class="section-title">帝国发展历程</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>2024年8月 - 团队诞生</h3>
+                    <p>2024年8月，在创始人“鹏”的引领下，“出生演员团队”正式成立。团队初期由五位核心成员组成：</p>
+                    <ul>
+                        <li><strong>出生总队长“杰”</strong>：负责团队整体管理与战略规划。</li>
+                        <li><strong>出生大队长“鹏”</strong>：创始人，主导团队发展方向。</li>
+                        <li><strong>出生大美女“明”</strong>：团队形象担当，负责对外宣传与资源整合。</li>
+                        <li><strong>出生中队长“宇”</strong>：团队中坚力量，负责执行与协调。</li>
+                        <li><strong>出生小队长“朝”</strong>：负责具体事务与团队运营。</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h3>2024年10月 - 变革与重生</h3>
+                    <p>2024年10月2日，团队经历了一次重大考验——担任出生中队长的“宇”因病离世，团队陷入短暂的悲痛与迷茫。然而，命运似乎对这支团队格外眷顾。10月6日，原出生中队成员“燕”接替中队长职位，展现了团队的坚韧与团结。</p>
+                    <p>10月8日，奇迹发生——“宇”突然归来，并以全新的姿态重新定义团队制度。他果断调整团队架构，开除原“出生总队长”和“出生大队长”，任命“朝”为出生总队长，自己则担任出生团队总裁，开启了团队的新篇章。</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h3>2024年11月 - 帝国崛起</h3>
+                    <p>2024年11月21日，团队迎来了历史性的转折点。在担任“出生大美女”的“明”的带领下，她与“莺”“梓”两位核心成员发动了一场意义深远的变革，将“出生演员团队”升级为“出生帝国”。</p>
+                    <p>“明”成为出生帝国的皇帝，象征着团队从“演员”到“帝国”的蜕变。与此同时，团队的核心成员也各自肩负起新的使命：</p>
+                    <ul>
+                        <li><strong>出生大将军“朝”</strong>：统领全局，守护帝国安全。</li>
+                        <li><strong>出生前将军“燕”</strong>：冲锋在前，开拓新领域。</li>
+                        <li><strong>出生左将军“莺”</strong>：辅助皇帝，协调内部事务。</li>
+                        <li><strong>出生右将军“梓”</strong>：负责战略布局与资源整合。</li>
+                        <li><strong>出生后将军“宇”</strong>：稳固后方，确保帝国长治久安。</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h3>2025年3月 - 持续辉煌</h3>
+                    <p>自帝国成立以来，团队在“明”的领导下，不断突破自我，创造了一个又一个辉煌的成就。每一位成员都各司其职，共同推动“出生帝国”迈向更高的巅峰。</p>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <!-- 音乐控制按钮 -->
-    <button class="music-control" id="musicBtn">🎵</button>
-
-    <!-- 背景音乐 -->
-    <audio id="bgMusic" loop>
-        <source src="https://mx-1341045368.cos.ap-chengdu.myqcloud.com/xht.mp3" type="audio/mpeg">
-        您的浏览器不支持音频播放。
-    </audio>
-
-    <script>
-        // 将军数据
-        const generals = [
-            { 
-                position: "前将军",
-                name: "雷东燕",
-                link: "https://www.csyan.asia/yan"
-            },
-            { 
-                position: "左将军",
-                name: "雷东莺",
-                link: "https://v.douyin.com/ifGPnoXR/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
-            },
-            { 
-                position: "右将军",
-                name: "樊亚春",
-                link: "https://v.douyin.com/ifGPKVJ7/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
-            },
-            { 
-                position: "后将军",
-                name: "侯大宇",
-                link: "https://v.douyin.com/ifG5RYua/?disable_auto_expose=1&font_scale=1.0&auto_play_bgm=0&show_more_button=1&show_loading=1&title="
-            }
-        ];
-
-        // 动态生成将军卡片
-        const generalsGrid = document.querySelector('.generals-grid');
-        generals.forEach(general => {
-            const card = document.createElement('div');
-            card.className = 'general-card';
-            card.innerHTML = `
-                <div class="position">${general.position}</div>
-                <div class="name">${general.name}</div>
-                <a href="${general.link}" 
-                   class="general-link"
-                   target="_blank">
-                    查看详情 →
-                </a>
-            `;
-            generalsGrid.appendChild(card);
-        });
-
-        // 卡片交互效果
-        document.querySelectorAll('.general-card').forEach(card => {
-            card.addEventListener('click', function() {
-                this.classList.toggle('active');
-            });
-        });
-
-        // 音乐控制
-        const musicBtn = document.getElementById('musicBtn');
-        const bgMusic = document.getElementById('bgMusic');
-        let isMusicPlaying = false;
-
-        musicBtn.addEventListener('click', () => {
-            if (isMusicPlaying) {
-                bgMusic.pause();
-                musicBtn.textContent = '🎵';
-            } else {
-                bgMusic.play();
-                musicBtn.textContent = '⏸';
-            }
-            isMusicPlaying = !isMusicPlaying;
-        });
-
-        // 页面加载动画和音乐自动播放
-        window.addEventListener('load', () => {
-            document.body.style.opacity = 1;
-            document.querySelector('.header').style.transform = 'translateY(0)';
-            
-            
-        });
-    </script>
+    <footer>
+        <p>© 2024-2025 出生帝国 | 团结 · 变革 · 重生 · 辉煌</p>
+    </footer>
 </body>
 </html>
