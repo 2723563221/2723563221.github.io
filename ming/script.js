@@ -1,13 +1,13 @@
 const BASE_URL = "https://mx-1341045368.cos.ap-chengdu.myqcloud.com/";
 
 const folders = [
-  {
+{
     id: "250312",
     bgm: "250312.mp3",
     media: ["250312-1.mp4", "250312-2.mp4"],
     date: "2025-03-12 15:00:18",
     text: "顺遂无虞 #射手座"
-  },
+},
   { id: "250227", bgm: "250227.mp3", media: ["250227-1.mp4", "250227-2.mp4", "250227-3.mp4"], date: "2025-02-27 20:18:27", text: "人总是真正经历失去，才会懂得珍惜#分享照片" },
   { id: "250217", bgm: "250217.mp3", media: ["250217-1.mp4"], date: "2025-02-17 10:49:21", text: "#生活碎片" },
   { id: "250115", bgm: "250115.mp3", media: ["250115-1.mp4", "250115-2.mp4"], date: "2025-01-15 11:14", text: "#人类幼崽 姨姨带娃，有福啦！" },
@@ -36,18 +36,30 @@ let currentFolderIndex = null;
 let isHomeScrollEnabled = true;
 let isMediaPlaying = false;
 let nextFolderPreview = null;
-let backdrop = null; // 黑色背景层
+let backdrop = null;
 
-// 初始化网格
+// 初始化网格（懒加载优化）
 function initGrid() {
   const grid = document.querySelector(".grid");
   if (!grid) return;
 
   grid.innerHTML = folders.map((folder, index) => {
     const thumbnail = `${BASE_URL}${folder.id}-0.webp`;
-    return `<div class="thumbnail" data-folder="${index}"><img src="${thumbnail}" class="thumb" alt="缩略图"></div>`;
+    return `<div class="thumbnail" data-folder="${index}"><img data-src="${thumbnail}" class="thumb" alt="缩略图"></div>`;
   }).join('');
 
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        img.onerror = () => console.error(`Failed to load thumbnail: ${img.dataset.src}`);
+        observer.unobserve(img);
+      }
+    });
+  }, { rootMargin: "50px" });
+
+  grid.querySelectorAll(".thumb").forEach(img => observer.observe(img));
   grid.querySelectorAll(".thumbnail").forEach(thumb => {
     thumb.addEventListener("click", () => openFolder(thumb.dataset.folder));
   });
@@ -63,18 +75,32 @@ function getDistance(touch1, touch2) {
 // 更新媒体计数器
 function updateMediaCounter(container) {
   const counter = container.querySelector(".media-counter");
-  const totalItems = container.querySelectorAll(".media-item").length;
-  counter.textContent = `${currentIndex + 1}/${totalItems}`;
+  if (counter) {
+    const totalItems = container.querySelectorAll(".media-item").length;
+    counter.textContent = `${currentIndex + 1}/${totalItems}`;
+  }
 }
 
 // 创建黑色背景
 function createBackdrop() {
   if (!backdrop) {
+    // 创建背景元素
     backdrop = document.createElement("div");
     backdrop.className = "backdrop";
+
+    // 创建文字元素
+    const noMoreText = document.createElement("div");
+    noMoreText.className = "no-more-text";
+    noMoreText.textContent = "暂时没有更多了";
+
+    // 将文字元素添加到背景元素中
+    backdrop.appendChild(noMoreText);
+
+    // 将背景元素添加到页面中
     document.body.appendChild(backdrop);
   }
 }
+
 
 // 打开文件夹
 function openFolder(folderIndex) {
@@ -88,6 +114,7 @@ function openFolder(folderIndex) {
   if (data.bgm) {
     bgm.src = `${BASE_URL}${data.bgm}`;
     bgm.loop = true;
+    bgm.preload = "auto";
   }
 
   const carousel = container.querySelector(".carousel");
@@ -98,20 +125,22 @@ function openFolder(folderIndex) {
     if (file.endsWith(".mp4")) {
       const video = document.createElement("video");
       video.loop = true;
+      video.preload = "auto";
+      video.playsinline = true; // 强制内嵌播放
+      video.setAttribute("webkit-playsinline", "true"); // iOS兼容性
       video.innerHTML = `<source src="${BASE_URL}${file}" type="video/mp4">`;
-      video.addEventListener("loadeddata", () => video.volume = 1);
+      video.onerror = () => console.error(`Failed to load video: ${file}`);
       item.appendChild(video);
     } else {
       const img = document.createElement("img");
       img.src = `${BASE_URL}${file}`;
+      img.onerror = () => console.error(`Failed to load image: ${file}`);
       item.appendChild(img);
     }
     carousel.appendChild(item);
   });
 
   preloadAdjacentMedia(data.media, 0);
-
-  // 创建黑色背景并显示
   createBackdrop();
   backdrop.style.display = "block";
 
@@ -120,16 +149,16 @@ function openFolder(folderIndex) {
   currentFolder = container;
   currentIndex = 0;
   isMediaPlaying = true;
-  if (data.bgm) bgm.play();
+
+  if (data.bgm) bgm.play().catch(err => console.error("BGM play failed:", err));
   playCurrentMedia();
 
   const dateElement = container.querySelector(".date");
   const descElement = container.querySelector(".description");
-  dateElement.textContent = data.date;
-  descElement.textContent = data.text || "";
-  
-  updateMediaCounter(container);
+  if (dateElement) dateElement.textContent = data.date;
+  if (descElement) descElement.textContent = data.text || "";
 
+  updateMediaCounter(container);
   disableHomeScroll();
   initSwipe(container);
 }
@@ -155,7 +184,7 @@ function preloadAdjacentMedia(mediaList, currentIndex) {
   preloadMedia(nextIndex);
 }
 
-// 创建并返回新文件夹容器
+// 创建新文件夹容器
 function createFolderContainer(newFolderIndex) {
   const newData = folders[newFolderIndex];
   const template = document.getElementById("folderTemplate");
@@ -166,6 +195,7 @@ function createFolderContainer(newFolderIndex) {
   if (newData.bgm) {
     newBgm.src = `${BASE_URL}${newData.bgm}`;
     newBgm.loop = true;
+    newBgm.preload = "auto";
   }
 
   const newCarousel = newContainer.querySelector(".carousel");
@@ -177,8 +207,10 @@ function createFolderContainer(newFolderIndex) {
     if (file.endsWith(".mp4")) {
       const video = document.createElement("video");
       video.loop = true;
+      video.preload = "auto";
+      video.playsinline = true;
+      video.setAttribute("webkit-playsinline", "true");
       video.innerHTML = `<source src="${BASE_URL}${file}" type="video/mp4">`;
-      video.addEventListener("loadeddata", () => video.volume = 1);
       item.appendChild(video);
     } else {
       const img = document.createElement("img");
@@ -192,8 +224,8 @@ function createFolderContainer(newFolderIndex) {
 
   const newDateElement = newContainer.querySelector(".date");
   const newDescElement = newContainer.querySelector(".description");
-  newDateElement.textContent = newData.date;
-  newDescElement.textContent = newData.text || "";
+  if (newDateElement) newDateElement.textContent = newData.date;
+  if (newDescElement) newDescElement.textContent = newData.text || "";
 
   return newContainer;
 }
@@ -233,7 +265,7 @@ function switchFolder(newFolderIndex, direction) {
     currentIndex = 0;
     isMediaPlaying = true;
     const newBgm = newContainer.querySelector(".bgm");
-    if (newBgm.src) newBgm.play();
+    if (newBgm.src) newBgm.play().catch(err => console.error("BGM play failed:", err));
     playCurrentMedia();
     updateMediaCounter(newContainer);
     initSwipe(newContainer);
@@ -262,7 +294,7 @@ function initSwipe(container) {
       deltaYAccumulated = 0;
     } else if (e.touches.length === 2) {
       gestureMode = "pinch";
-      closeBtn.style.display = "none";
+      if (closeBtn) closeBtn.style.display = "none";
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       initialDistance = getDistance(touch1, touch2);
@@ -293,23 +325,18 @@ function initSwipe(container) {
       const totalItems = container.querySelectorAll(".media-item").length;
 
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // 左右滑动
         let translateX = -currentIndex * 100 + (deltaX / window.innerWidth) * 100;
         if (currentIndex === 0 && deltaX > 0) translateX = 0;
         else if (currentIndex === totalItems - 1 && deltaX < 0) translateX = -currentIndex * 100;
         carousel.style.transition = "none";
         carousel.style.transform = `translateX(${translateX}%)`;
       } else {
-        // 上下滑动
         deltaYAccumulated = deltaY;
         const translateY = (deltaY / window.innerHeight) * 100;
         container.style.transition = "none";
         container.style.transform = `translateY(${translateY}%)`;
-
-        // 显示黑色背景
         backdrop.style.display = "block";
 
-        // 提前显示下一个文件夹
         if (deltaY > 0 && currentFolderIndex > 0 && !nextFolderPreview) {
           nextFolderPreview = createFolderContainer(currentFolderIndex - 1);
           document.body.appendChild(nextFolderPreview);
@@ -363,7 +390,6 @@ function initSwipe(container) {
         const deltaY = e.changedTouches[0].clientY - startY;
 
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          // 左右滑动
           carousel.style.transition = "transform 0.3s ease";
           if (Math.abs(deltaX) > 65) {
             if (deltaX > 0 && currentIndex > 0) currentIndex--;
@@ -374,7 +400,6 @@ function initSwipe(container) {
           updateMediaCounter(container);
           preloadAdjacentMedia(folders[currentFolderIndex].media, currentIndex);
         } else {
-          // 上下滑动
           container.style.transition = "transform 0.3s ease";
           if (Math.abs(deltaYAccumulated) > 65) {
             let newFolderIndex = currentFolderIndex;
@@ -390,7 +415,7 @@ function initSwipe(container) {
                 nextFolderPreview.remove();
                 nextFolderPreview = null;
               }
-              backdrop.style.display = "block"; // 保持背景显示
+              backdrop.style.display = "block";
             }
           } else {
             container.style.transform = "translateY(0)";
@@ -398,7 +423,7 @@ function initSwipe(container) {
               nextFolderPreview.remove();
               nextFolderPreview = null;
             }
-            backdrop.style.display = "block"; // 保持背景显示
+            backdrop.style.display = "block";
           }
         }
       } else if (gestureMode === "pinch") {
@@ -406,23 +431,23 @@ function initSwipe(container) {
         currentMediaItem.style.transition = "transform 0.3s ease";
         currentMediaItem.style.transform = "translate(0px, 0px) scale(1)";
         currentMediaItem.style.transformOrigin = "center center";
-        closeBtn.style.display = "block";
+        if (closeBtn) closeBtn.style.display = "block";
       }
       gestureMode = null;
     }
   });
 
-  container.querySelector(".close-btn").addEventListener("click", closeFolder);
+  if (closeBtn) closeBtn.addEventListener("click", closeFolder);
 
   container.addEventListener("click", (e) => {
-    if (container.querySelector(".close-btn").contains(e.target)) return;
+    if (closeBtn && closeBtn.contains(e.target)) return;
     isMediaPlaying = !isMediaPlaying;
     const bgm = container.querySelector(".bgm");
     const currentItem = container.querySelectorAll(".media-item")[currentIndex];
     const video = currentItem.querySelector("video");
     if (isMediaPlaying) {
-      if (bgm.src) bgm.play();
-      if (video) video.play();
+      if (bgm.src) bgm.play().catch(err => console.error("BGM play failed:", err));
+      if (video) video.play().catch(err => console.error("Video play failed:", err));
     } else {
       if (bgm.src) bgm.pause();
       if (video) video.pause();
@@ -432,13 +457,12 @@ function initSwipe(container) {
 
 // 播放当前媒体
 function playCurrentMedia() {
-  if (isMediaPlaying && currentFolder) {
-    const currentItem = currentFolder.querySelectorAll(".media-item")[currentIndex];
-    const video = currentItem.querySelector("video");
-    if (video) {
-      video.currentTime = 0;
-      video.play();
-    }
+  if (!isMediaPlaying || !currentFolder) return;
+  const currentItem = currentFolder.querySelectorAll(".media-item")[currentIndex];
+  const video = currentItem.querySelector("video");
+  if (video && video.paused) {
+    video.currentTime = 0;
+    video.play().catch(err => console.error("Video play failed:", err));
   }
 }
 
@@ -462,10 +486,7 @@ function closeFolder() {
     nextFolderPreview.remove();
     nextFolderPreview = null;
   }
-  // 关闭文件夹时移除背景
-  if (backdrop) {
-    backdrop.style.display = "none";
-  }
+  if (backdrop) backdrop.style.display = "none";
   currentIndex = 0;
   currentFolderIndex = null;
   isMediaPlaying = false;
@@ -495,16 +516,18 @@ const bgMusic = document.getElementById("bgMusic");
 const playIcon = document.getElementById("playIcon");
 let isMusicPlaying = false;
 
-musicBtn.addEventListener("click", () => {
-  if (isMusicPlaying) {
-    bgMusic.pause();
-    playIcon.src = `${BASE_URL}gz.png`;
-  } else {
-    bgMusic.play();
-    playIcon.src = `${BASE_URL}ygz.png`;
-  }
-  isMusicPlaying = !isMusicPlaying;
-});
+if (musicBtn && bgMusic && playIcon) {
+  musicBtn.addEventListener("click", () => {
+    if (isMusicPlaying) {
+      bgMusic.pause();
+      playIcon.src = `${BASE_URL}gz.png`;
+    } else {
+      bgMusic.play().catch(err => console.error("Background music play failed:", err));
+      playIcon.src = `${BASE_URL}ygz.png`;
+    }
+    isMusicPlaying = !isMusicPlaying;
+  });
+}
 
 // 阻止默认滚动
 document.addEventListener("touchmove", (e) => {
