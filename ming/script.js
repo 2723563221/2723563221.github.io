@@ -1,5 +1,18 @@
 const BASE_URL = "https://mx-1341045368.cos.ap-chengdu.myqcloud.com/";
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      })
+      .catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+
+
 // 文件夹数据
 const folders = [
   { id: "250312", bgm: "250312.mp3", media: ["250312-1.mp4", "250312-2.mp4"], date: "2025-03-12 15:00:18", text: "顺遂无虞 #射手座" },
