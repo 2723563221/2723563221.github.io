@@ -1,18 +1,13 @@
 const BASE_URL = "https://mx-1341045368.cos.ap-chengdu.myqcloud.com/";
 
+// 文件夹数据
 const folders = [
-{
-    id: "250312",
-    bgm: "250312.mp3",
-    media: ["250312-1.mp4", "250312-2.mp4"],
-    date: "2025-03-12 15:00:18",
-    text: "顺遂无虞 #射手座"
-},
+  { id: "250312", bgm: "250312.mp3", media: ["250312-1.mp4", "250312-2.mp4"], date: "2025-03-12 15:00:18", text: "顺遂无虞 #射手座" },
   { id: "250227", bgm: "250227.mp3", media: ["250227-1.mp4", "250227-2.mp4", "250227-3.mp4"], date: "2025-02-27 20:18:27", text: "人总是真正经历失去，才会懂得珍惜#分享照片" },
   { id: "250217", bgm: "250217.mp3", media: ["250217-1.mp4"], date: "2025-02-17 10:49:21", text: "#生活碎片" },
   { id: "250115", bgm: "250115.mp3", media: ["250115-1.mp4", "250115-2.mp4"], date: "2025-01-15 11:14", text: "#人类幼崽 姨姨带娃，有福啦！" },
-  { id: "250101", bgm: "250101.mp3", media: ["250101-1.mp4", "250101-2.mp4", "250101-3.mp4", "250101-4.mp4"], date: "2025-01-01 14:54", text: "#分享照片" },
-  { id: "241215", bgm: "241215.mp3", media: ["241215-1.mp4", "241215-2.mp4", "241215-3.mp4", "241215-4.webp"], date: "2024-12-15 17:41", text: "#生活碎片" },
+  { id: "250101", bgm: "250101.mp3", media: ["250101-1.mp4", "250101-2.mp4", "250101-3.mp4", "250101-4.mp4"], date: "2025-01-01 14:54:26", text: "#分享照片" },
+  { id: "241215", bgm: "241215.mp3", media: ["241215-1.mp4", "241215-2.mp4", "241215-3.mp4", "241215-4.webp"], date: "2024-12-15 17:41:11", text: "#生活碎片" },
   { id: "241128", bgm: "241128.mp3", media: ["241128-1.png"], date: "2024-11-28 19:44" },
   { id: "241123", bgm: "241123.mp3", media: ["241123-1.mp4", "241123-2.mp4", "241123-3.png"], date: "2024-11-23 21:15", text: "22" },
   { id: "241116", bgm: "241116.mp3", media: ["241116-1.mp4"], date: "2024-11-16 09:02", text: "祝自己小人得志" },
@@ -20,13 +15,19 @@ const folders = [
   { id: "241010-1", bgm: "241010.mp3", media: ["241010-1-0.webp", "241010-2.webp"], date: "2024-10-10 12:37" },
   { id: "241005", bgm: "241005.mp3", media: ["241005-1.mp4"], date: "2024-10-05 18:41", text: "说遗憾也不是很遗憾说不遗憾也很遗憾" },
   { id: "241001", bgm: "241001.mp3", media: ["241001-1.webp", "241001-2.webp", "241001-3.webp", "241001-4.webp", "241001-5.webp"], date: "2024-10-01 23:18", text: "没有常青树做自己的自由花" },
-  { id: "240930", bgm: "240930.mp3", media: ["240930-1.mp4"], date: "2024-09-30 00:20", text: "圆周率没有尽头，人们也只记得开头！" },
+  { id: "240930", bgm: "240930.mp3", media: ["240930-1.mp4"], date: "2024-09-30 00:20:11", text: "圆周率没有尽头，人们也只记得开头！" },
   { id: "240923-1", bgm: "240923.mp3", media: ["240923-1-0.webp"], date: "2024-09-23 01:14", text: "你承诺过的月亮，还是没有出现！" },
   { id: "240915", bgm: "240915.mp3", media: ["240915-1.webp", "240915-2.webp"], date: "2024-09-15 23:37", text: "幸福没有标准答案" },
   { id: "240910", bgm: "240910.mp3", media: ["240910-1.jpg", "240910-2.jpg"], date: "2024-09-10 23:08" },
   { id: "240904", bgm: "240904.mp3", media: ["240904-1.mp4"], date: "2024-09-04 01:28" },
   { id: "240826", bgm: "240826.mp3", media: ["240826-1.jpg"], date: "2024-08-26 22:57" },
   { id: "240624", bgm: "240624.mp3", media: ["240624-1.mp4"], date: "2024-06-24 23:21" }
+];
+
+// 进入时隐藏的作品ID
+const hiddenFolderIds = [
+  "250227", "250217", "250115", "241128", "241123", "241116", "241102", "241010-1", 
+  "241005", "241001", "240923-1", "240915", "240910", "240904", "240826", "240624"
 ];
 
 // 全局状态变量
@@ -37,15 +38,17 @@ let isHomeScrollEnabled = true;
 let isMediaPlaying = false;
 let nextFolderPreview = null;
 let backdrop = null;
+let areHiddenFoldersRevealed = false; // 跟踪隐藏文件夹是否显示
 
-// 初始化网格（懒加载优化）
+// 初始化网格（懒加载优化，仅显示未隐藏的文件夹）
 function initGrid() {
   const grid = document.querySelector(".grid");
   if (!grid) return;
 
-  grid.innerHTML = folders.map((folder, index) => {
+  const visibleFolders = folders.filter(folder => !hiddenFolderIds.includes(folder.id));
+  grid.innerHTML = visibleFolders.map((folder, index) => {
     const thumbnail = `${BASE_URL}${folder.id}-0.webp`;
-    return `<div class="thumbnail" data-folder="${index}"><img data-src="${thumbnail}" class="thumb" alt="缩略图"></div>`;
+    return `<div class="thumbnail" data-folder="${folders.indexOf(folder)}"><img data-src="${thumbnail}" class="thumb" alt="缩略图"></div>`;
   }).join('');
 
   const observer = new IntersectionObserver((entries) => {
@@ -63,6 +66,23 @@ function initGrid() {
   grid.querySelectorAll(".thumbnail").forEach(thumb => {
     thumb.addEventListener("click", () => openFolder(thumb.dataset.folder));
   });
+}
+
+// 显示所有文件夹（包括隐藏的）
+function revealAllFolders() {
+  const grid = document.querySelector(".grid");
+  if (!grid) return;
+
+  grid.innerHTML = folders.map((folder, index) => {
+    const thumbnail = `${BASE_URL}${folder.id}-0.webp`;
+    return `<div class="thumbnail" data-folder="${index}"><img src="${thumbnail}" class="thumb" alt="缩略图"></div>`;
+  }).join('');
+
+  grid.querySelectorAll(".thumbnail").forEach(thumb => {
+    thumb.addEventListener("click", () => openFolder(thumb.dataset.folder));
+  });
+
+  areHiddenFoldersRevealed = true;
 }
 
 // 计算两点间距离
@@ -84,23 +104,15 @@ function updateMediaCounter(container) {
 // 创建黑色背景
 function createBackdrop() {
   if (!backdrop) {
-    // 创建背景元素
     backdrop = document.createElement("div");
     backdrop.className = "backdrop";
-
-    // 创建文字元素
     const noMoreText = document.createElement("div");
     noMoreText.className = "no-more-text";
     noMoreText.textContent = "暂时没有更多了";
-
-    // 将文字元素添加到背景元素中
     backdrop.appendChild(noMoreText);
-
-    // 将背景元素添加到页面中
     document.body.appendChild(backdrop);
   }
 }
-
 
 // 打开文件夹
 function openFolder(folderIndex) {
@@ -126,8 +138,8 @@ function openFolder(folderIndex) {
       const video = document.createElement("video");
       video.loop = true;
       video.preload = "auto";
-      video.playsinline = true; // 强制内嵌播放
-      video.setAttribute("webkit-playsinline", "true"); // iOS兼容性
+      video.playsinline = true;
+      video.setAttribute("webkit-playsinline", "true");
       video.innerHTML = `<source src="${BASE_URL}${file}" type="video/mp4">`;
       video.onerror = () => console.error(`Failed to load video: ${file}`);
       item.appendChild(video);
@@ -230,7 +242,7 @@ function createFolderContainer(newFolderIndex) {
   return newContainer;
 }
 
-// 切换文件夹
+// 切换文件夹（跳过隐藏文件夹）
 function switchFolder(newFolderIndex, direction) {
   if (currentFolderIndex === newFolderIndex) return;
 
@@ -240,7 +252,7 @@ function switchFolder(newFolderIndex, direction) {
   newContainer.style.transition = "transform 0.3s ease";
   newContainer.style.transform = direction === "up" ? "translateY(-100%)" : "translateY(100%)";
 
-  newContainer.offsetHeight; // 触发重绘
+  newContainer.offsetHeight;
   newContainer.style.transform = "translateY(0)";
   if (currentFolder) {
     currentFolder.style.transition = "transform 0.3s ease";
@@ -272,7 +284,7 @@ function switchFolder(newFolderIndex, direction) {
   }, 300);
 }
 
-// 初始化滑动和缩放
+// 初始化滑动和缩放（修改上下滑动逻辑，修复隐藏文件夹预览问题）
 function initSwipe(container) {
   let startX = 0;
   let startY = 0;
@@ -337,16 +349,26 @@ function initSwipe(container) {
         container.style.transform = `translateY(${translateY}%)`;
         backdrop.style.display = "block";
 
+        const visibleFolders = folders.filter(folder => !hiddenFolderIds.includes(folder.id));
+        const currentVisibleIndex = visibleFolders.findIndex(f => f.id === folders[currentFolderIndex].id);
+
         if (deltaY > 0 && currentFolderIndex > 0 && !nextFolderPreview) {
           nextFolderPreview = createFolderContainer(currentFolderIndex - 1);
           document.body.appendChild(nextFolderPreview);
           nextFolderPreview.style.display = "block";
           nextFolderPreview.style.transform = "translateY(-100%)";
-        } else if (deltaY < 0 && currentFolderIndex < folders.length - 1 && !nextFolderPreview) {
-          nextFolderPreview = createFolderContainer(currentFolderIndex + 1);
-          document.body.appendChild(nextFolderPreview);
-          nextFolderPreview.style.display = "block";
-          nextFolderPreview.style.transform = "translateY(100%)";
+        } else if (deltaY < 0 && !nextFolderPreview) {
+          if (areHiddenFoldersRevealed && currentFolderIndex < folders.length - 1) {
+            nextFolderPreview = createFolderContainer(currentFolderIndex + 1);
+            document.body.appendChild(nextFolderPreview);
+            nextFolderPreview.style.display = "block";
+            nextFolderPreview.style.transform = "translateY(100%)";
+          } else if (!areHiddenFoldersRevealed && currentVisibleIndex < visibleFolders.length - 1) {
+            nextFolderPreview = createFolderContainer(folders.indexOf(visibleFolders[currentVisibleIndex + 1]));
+            document.body.appendChild(nextFolderPreview);
+            nextFolderPreview.style.display = "block";
+            nextFolderPreview.style.transform = "translateY(100%)";
+          }
         }
 
         if (nextFolderPreview) {
@@ -402,13 +424,30 @@ function initSwipe(container) {
         } else {
           container.style.transition = "transform 0.3s ease";
           if (Math.abs(deltaYAccumulated) > 65) {
-            let newFolderIndex = currentFolderIndex;
-            if (deltaYAccumulated > 0 && currentFolderIndex > 0) {
-              newFolderIndex = currentFolderIndex - 1;
-              switchFolder(newFolderIndex, "up");
-            } else if (deltaYAccumulated < 0 && currentFolderIndex < folders.length - 1) {
-              newFolderIndex = currentFolderIndex + 1;
-              switchFolder(newFolderIndex, "down");
+            let newFolderIndex;
+            const visibleFolders = folders.filter(folder => !hiddenFolderIds.includes(folder.id));
+
+            if (!areHiddenFoldersRevealed) {
+              const currentVisibleIndex = visibleFolders.findIndex(f => f.id === folders[currentFolderIndex].id);
+              if (deltaYAccumulated > 0 && currentVisibleIndex > 0) {
+                newFolderIndex = folders.indexOf(visibleFolders[currentVisibleIndex - 1]);
+              } else if (deltaYAccumulated < 0 && currentVisibleIndex < visibleFolders.length - 1) {
+                newFolderIndex = folders.indexOf(visibleFolders[currentVisibleIndex + 1]);
+              } else {
+                newFolderIndex = currentFolderIndex; // 无需切换
+              }
+            } else {
+              if (deltaYAccumulated > 0 && currentFolderIndex > 0) {
+                newFolderIndex = currentFolderIndex - 1;
+              } else if (deltaYAccumulated < 0 && currentFolderIndex < folders.length - 1) {
+                newFolderIndex = currentFolderIndex + 1;
+              } else {
+                newFolderIndex = currentFolderIndex; // 首尾不循环
+              }
+            }
+
+            if (newFolderIndex !== currentFolderIndex) {
+              switchFolder(newFolderIndex, deltaYAccumulated > 0 ? "up" : "down");
             } else {
               container.style.transform = "translateY(0)";
               if (nextFolderPreview) {
@@ -534,5 +573,17 @@ document.addEventListener("touchmove", (e) => {
   if (!isHomeScrollEnabled) e.preventDefault();
 }, { passive: false });
 
-// 初始化
-document.addEventListener("DOMContentLoaded", initGrid);
+// 初始化及“暂时没有更多了”点击事件
+document.addEventListener("DOMContentLoaded", () => {
+  initGrid();
+  const moreBtn = document.querySelector(".more-btn");
+  if (moreBtn) {
+    moreBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!areHiddenFoldersRevealed) {
+        revealAllFolders();
+        moreBtn.textContent = "已加载所有内容";
+      }
+    });
+  }
+});
